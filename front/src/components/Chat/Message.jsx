@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const Message = ({
   content,
@@ -9,15 +11,22 @@ const Message = ({
   isLoading = false,
   timestamp,
 }) => {
+  // AOS 초기화
+  useEffect(() => {
+    AOS.init({ duration: 1000 }); // 애니메이션 지속 시간 설정
+  }, []);
+
   return (
     <MessageComponent className={className} $role={$role}>
       <MessageProfileComponent $role={$role}>
         <span className="emoji">{$role === "user" ? "" : "🚨"}</span>
         <span className="timestamp">{timestamp}</span>
       </MessageProfileComponent>
-      <MessageContent>
+      <MessageContent
+        data-aos={$role === "user" ? "" : "fade-right"}
+      >
         {isInputting || isLoading ? (
-          <span>...Loading</span> 
+          <span>...Loading</span>
         ) : (
           <span>
             {content
