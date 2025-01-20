@@ -34,6 +34,7 @@ const Chat = () => {
   const [input, setInput] = useState(""); // 입력된 텍스트 값
   const [messages, setMessages] = useState([]); // 메시지 목록
   const [isLoading, setLoading] = useState(false); // 로딩 상태
+  const [isInputting, setInputting] = useState(false); // 입력 중 상태
   const messageEndRef = useRef(null); // 스크롤 조정
 
   // 메시지 스크롤 조정 함수
@@ -48,6 +49,8 @@ const Chat = () => {
   // 메시지 입력 처리
   const handleInputChange = useCallback((value) => {
     setInput(value);
+    setInputting(true); // 입력 중 상태 설정
+    setTimeout(() => setInputting(false), 500); // 일정 시간 후 입력 상태 해제
   }, []);
 
   // 메시지 추가 및 전송 처리
@@ -56,27 +59,45 @@ const Chat = () => {
       alert("메시지를 입력하세요!");
       return;
     }
-  
+
     const userMessage = {
       role: "user",
       content: input.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-  
+
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInput("");
     scrollBottom();
-  
+
     try {
       setLoading(true);
-      const response = await CallGPT({ prompt: input.trim() });
-      const botMessage = {
-        role: "assistant",
-        content: `[${response.title}]\n\n${response.emergency_detail}`,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
 
+      // 로딩 중 메시지 추가
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          role: "assistant",
+          content: "",
+          isLoading: true, // 로딩 상태 표시
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+
+      const response = await CallGPT({ prompt: input.trim() });
+
+      // 로딩 메시지를 응답 메시지로 교체
+      setMessages((prevMessages) =>
+        prevMessages.map((msg, index) =>
+          index === prevMessages.length - 1
+            ? {
+                ...msg,
+                content: `[${response.title}]\n\n${response.emergency_detail}`,
+                isLoading: false,
+              }
+            : msg
+        )
+      );
     } catch (error) {
       console.error("AI 응답 에러:", error);
       setMessages((prevMessages) => [
@@ -112,19 +133,21 @@ const Chat = () => {
                   key={idx}
                   $role={message.role}
                   content={message.content}
+                  isLoading={message.isLoading || false}
+                  isInputting={isInputting}
                   timestamp={message.timestamp}
                 />
               ))}
-              <div ref={messageEndRef} /> {/* 대화창 끝을 나타내는 요소 */}
+              <div ref={messageEndRef} />
             </HomepageMessage>
 
             <HomepageInput>
               <MessageInput>
                 <button className="speech" onClick={toggleListening}>
                   {listening ? (
-                    <HiSpeakerXMark style={{ color: "#FF4F4D", marginLeft: "-11px" }} size={25} />
+                    <HiSpeakerXMark style={{ color: "#FF4F4D" }} size={25} />
                   ) : (
-                    <HiSpeakerWave style={{ color: "#FF4F4D", marginLeft: "-11px" }} size={25} />
+                    <HiSpeakerWave style={{ color: "#FF4F4D" }} size={25} />
                   )}
                 </button>
                 <InputText
@@ -148,7 +171,7 @@ const Chat = () => {
       </Container>
     </motion.div>
   );
-};
+}
 
 const Header = styled.header`
   .back {
@@ -192,7 +215,7 @@ const MessageInput = styled.div`
 
   .speech {
     position: absolute;
-    left: 14px;
+    left: 5px;
     bottom: 10px;
     padding: 0 12px;
     height: 30px;
