@@ -91,6 +91,8 @@
 - `"@styled-components/react",` <br />
 - `"react-rounter-dom"` <br />
 - `"framer-motion"` <br />
+- `"Chat gpt api"` <br />
+- `"STT, TTS"` <br />
 <br/>
 <br />
 
