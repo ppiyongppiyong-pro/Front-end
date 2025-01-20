@@ -23,12 +23,12 @@ const Message = ({
         ) : (
           <span>
             {content
+            .replace(/\.\s*/g, ".\n")
             .replace(/\\n/g, "\n")
             .split("\n")
             .map((line, index) => (
               <span key={index}>
                   {line}
-                  <br />
                   <br />
               </span>
             ))

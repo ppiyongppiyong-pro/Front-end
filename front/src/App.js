@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import React, { Suspense } from "react";
-import AI from "./AIChat/AI";
 
 const Loading = React.lazy(() => import('./pages/Loading'));
 const Login = React.lazy(() => import('./pages/Login'));
@@ -23,7 +22,6 @@ function App() {
             <Route path="/" element={<Login />} />
             <Route path='/auth/kakao/callback' element={<Redirection />} />
             <Route path="/Chat" element={<Chat />} />
-            <Route path="/AI" element={<AI />} />
             <Route path="/Manual" element={<Manual />} />
             <Route path="/ManualDetail" element={<ManualDetail />} />
             <Route path="/Mypage" element={<Mypage />} />

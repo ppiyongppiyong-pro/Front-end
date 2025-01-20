@@ -12,7 +12,7 @@ import { HiSpeakerXMark } from "react-icons/hi2";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
 // AI 챗봇
-import { CallGPT } from "../AIChat/gpt";
+import { CallGPT } from "../components/Chat/gpt";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -50,8 +50,6 @@ const Chat = () => {
     setInput(value);
   }, []);
 
-  const [streamingContent, setStreamingContent] = useState("");
-
   // 메시지 추가 및 전송 처리
   const handleSendMessage = async () => {
     if (!input.trim()) {
@@ -74,7 +72,7 @@ const Chat = () => {
       const response = await CallGPT({ prompt: input.trim() });
       const botMessage = {
         role: "assistant",
-        content: `${response.title}\n\n${response.emergency_detail}`,
+        content: `[${response.title}]\n\n${response.emergency_detail}`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prevMessages) => [...prevMessages, botMessage]);

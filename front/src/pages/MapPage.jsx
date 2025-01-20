@@ -31,9 +31,9 @@ function MapPage() {
                 // const token = localStorage.getItem("token");
                 const y=localStorage.getItem("lat");
                 const x=localStorage.getItem("lng");
-                const token = 'eyJ0eXBlIjoicmVmcmVzaCIsImFsZyI6IkhTMjU2In0.eyJzdWIiOiIxIiwicm9sZXMiOltdLCJpYXQiOjE3MzY2NDQ4ODMsImV4cCI6MTczNzI0OTY4M30.jngj_llUSCuD0ee4a1UuvkWfLSS-KWMkyPOXyr-_eEQ';
+                const token = 'eyJ0eXBlIjoicmVmcmVzaCIsImFsZyI6IkhTMjU2In0.eyJzdWIiOiIxIiwicm9sZXMiOltdLCJpYXQiOjE3MzczNTI2MzQsImV4cCI6MTczNzk1NzQzNH0.GQEFNH8P1HPpGLN9WT-YZ0yBVmetVr8jvRg15wdptf8';
 
-                const response = await axios.get(`/api/api/v1/map/hospital`, {
+                const response = await axios.get("http://52.79.245.244/api/v1/map/hospital", {
                     headers: {
                       Authorization: `Bearer ${token}`,
                     },

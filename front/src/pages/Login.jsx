@@ -15,7 +15,7 @@ function Login() {
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post(`/api/auth/signin`, {
+            const response = await axios.post("http://52.79.245.244/auth/signin", {
                 email: username,
                 password: password,
             });

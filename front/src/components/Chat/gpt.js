@@ -35,7 +35,7 @@ export const CallGPT = async ({ prompt }) => {
             당신은 JSON 형식으로만 응답을 반환해야 합니다. 다른 텍스트나 형식은 포함하지 않습니다.
             반환 형식:
             {
-            "title": "응답 제목",
+            "title": "[응답 제목]",
             "emergency_detail": "현재 긴급상황에 대처하는 방법을 단계별로 넘버링을 매겨 설명합니다."
             }
             JSON 외의 텍스트를 포함하면 안 됩니다.
