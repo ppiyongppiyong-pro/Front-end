@@ -103,55 +103,48 @@
 
 ## 📁 폴더 구조
 
-```tsx
-|-- 📁 node_modules
+```jsx
+|-- 📁 .github
 |-- 📁 public
     |-- 📁 assets
     |-- 📁 img
 |-- 📁 src
     |-- 📁 assets
+    |	|   |-- 📁 bottom_bar
+    |   |    	
+    |	|   |-- 📁 chat
+    |   |    	
+    |	|   |-- 📁 map
     |-- 📁 components
-	  |   |-- 📁 ArticleCard
-	  |   |-- 📁 FloatingButton
-	  |   |-- 📁 Footer
-	  |   |-- 📁 Header
-	  |   |-- 📁 Icon
-	  |   |-- 📁 libraryPage
-	  |   |-- 📁 Logo
-	  |   |-- 📁 Ntag
+	  |   |-- 📁 Chat
     |-- 📁 pages
-    |	|   |-- 📁 apply
-    |   |    	|-- 📁 _components
-    |   |    	|-- Apply.tsx
-    |	|   |-- 📁 book
-    |   |    	|-- 📁_components
-    |   |    	|-- Book.tsx
-    |	|   |-- 📁 home
-    |   |    	|-- 📁_components
-    |   |    	|-- Home.tsx
-    |	|   |-- 📁 library
-    |   |    	|-- 📁_components
-    |   |    	|-- Page.tsx
-    |   |  
-    |-- 📁 apis (API 요청 함수 모음 폴더)
-    |-- 📁 hooks (커스텀 훅을 담아두는 폴더)
-    |-- 📁 styles ( GlobalStyles , theme.ts )
-    |-- 📁 utils ( 재사용이 높은 함수 모음 폴더 )
-    |-- 📁 interface ( 재사용 가능한 인터페이스 모음 폴더 )
-    |-- Router.tsx (라우터 파일)
-    |-- App.tsx
-    |-- main.tsx
-|-- .eslintrc.json
+    |	|   |-- 📁 Chat
+    |   |    	
+    |	|   |-- 📁 Loading
+    |   |    	
+    |	|   |-- 📁 Login
+    |   |    	
+    |	|   |-- 📁 Manual
+    |   |    	
+    |	|   |-- 📁 ManualDetail
+    |   |   
+    |	|   |-- 📁 MapPage
+    |   |   
+    |	|   |-- 📁 Modal
+    |   |   
+    |	|   |-- 📁 MyPage
+    |   |   
+    |	|   |-- 📁 Signup
+    |-- 📁 styles ( GlobalStyles , Modal.css )
+    |-- Router.jsx (라우터 파일)
+    |-- App.jsx
 |-- .gitignore
-|-- .prettierrc
 |-- README.md
 |-- package.json
-|-- tsconfig.json
-|-- yarn.lock
+|-- index.js
+|-- README.md
 ...
 ```
-
-
 <hr></hr>
 
 
@@ -221,10 +214,20 @@ type과 콜론 후 한칸 띄고 subject
 <details>
 <summary> 2️⃣ Branch 전략 </summary>
 
-- `Git-Flow` 전략
+- `Git-Flow`
 - 브랜치 운영
     - `main` : 완전히 안전하다고 판단되었을 때, 즉 배포가 가능한 최종 merge하는 곳
     - `develop` : 배포하기 전 개발 중일 때 각자의 브랜치에서 merge하는 브랜치
-    - `기능명`: 새로운 기능 개발. 개발이 완료되면 main 브랜치로 병합
-   
+    - `feat/#issue/기능명`: feature 브랜치. 새로운 기능 개발. 개발이 완료되면 develop 브랜치로 병합
+    - `fix/#issue/기능명` : feature브랜치 생성 후 버그가 생겼을 때 수정하는 브랜치
+  ```jsx
+  main
+    ㄴ develop
+      ㄴ feat/#이슈번호/기능명(camelCase)
+  ```
+
 <br/>
+
+</details>
+
+
