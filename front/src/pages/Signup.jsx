@@ -1,4 +1,4 @@
-import { BodyWrapper, Body } from '../styles/Global';
+import { Container, BodyWrapper, Body } from '../styles/Global';
 import { motion } from "framer-motion";
 import React, { useState } from 'react';
 import styled from "styled-components";
@@ -107,7 +107,7 @@ function Signup() {
 
             console.log('회원가입 성공:', response.data);
             alert('회원가입이 완료되었습니다.');
-            navigate('/login');
+            navigate('/');
         } catch (error) {
             console.error('회원가입 실패:', error.response?.data || error.message);
             alert('회원가입에 실패했습니다. 다시 시도해주세요.');
@@ -116,7 +116,7 @@ function Signup() {
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Container>
+            <SignUpContainer>
                 <BodyWrapper>
                     <Header>
                         <img className="logo" src={logo} alt="logo" />
@@ -205,13 +205,17 @@ function Signup() {
                         <ButtonWrapper>
                             <SignupButton onClick={handleSignup}>회원가입</SignupButton>
                         </ButtonWrapper>
-                        <Login onClick={() => navigate('/login')}>로그인</Login>
+                        <Login onClick={() => navigate('/')}>로그인</Login>
                     </Body>
                 </BodyWrapper>
-            </Container>
+            </SignUpContainer>
         </motion.div>
     );
 };
+
+const SignUpContainer = styled(Container)`
+    background: linear-gradient(179.98deg, #FFFFFF 20.02%, rgba(255, 243, 243, 0.671667) 73.6%, rgba(253, 226, 225, 0.51) 99.98%) !important; 
+`;
 
 const Header = styled.header`
   position: relative;
@@ -291,29 +295,6 @@ const ErrorMsg = styled.p`
     color: red;
     font-size: 0.875rem;
     text-align: center;
-`;
-
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    position: relative;
-    text-align: center;
-    background: linear-gradient(to bottom, #ffffff, #FDE2E180);
-    background-size: cover;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    align-items: center;
-    border: 1px solid;
-    overflow-x: hidden;
-
-    @media (hover: hover) {
-        width: 390px;
-        margin: 0 auto;
-    }
-    &::-webkit-scrollbar {
-        display: none;
-    }
 `;
 
 export default Signup;

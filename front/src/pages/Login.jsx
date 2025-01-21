@@ -1,7 +1,8 @@
-import { BodyWrapper, Body } from '../styles/Global';
+import { Container, BodyWrapper, Body } from '../styles/Global';
 import { motion } from "framer-motion";
 import React, { useState } from 'react';
 import styled from "styled-components";
+import { KAKAO_AUTH_URL } from "../secret/OAuth.js";  
 import { BoxType } from '../components/Box/BoxType';  
 import Input from "../components/Input/Input";
 import logo from "../assets/logo.svg";
@@ -39,16 +40,20 @@ function Login() {
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh); 
       
-      navigate('/'); 
+      navigate('/MapPage'); 
     } catch (error) {
       setErrorMessage('로그인 실패. 아이디 또는 비밀번호를 확인해주세요.');
       console.error('로그인 오류:', error);
     }
   };
+
+  const kakaoLogin = () => {
+    window.location.href = KAKAO_AUTH_URL;
+  }
   
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-        <Container>
+        <LoginContainer>
             <BodyWrapper>
                 <Header>
                     <img className="logo" src={logo} alt="logo" />
@@ -82,14 +87,22 @@ function Login() {
                   <ButtonWrapper>
                     <LoginButton onClick={handleLogin}>로그인</LoginButton>
                   </ButtonWrapper>
+                  <KakaoButton onClick={kakaoLogin}>
+                    카카오 로그인
+                  </KakaoButton>
                 </Body>
             </BodyWrapper>
-        </Container>
+        </LoginContainer>
     </motion.div>
   );
 };
 
+const LoginContainer = styled(Container)`
+    background: linear-gradient(179.98deg, #FFFFFF 20.02%, rgba(255, 243, 243, 0.671667) 73.6%, rgba(253, 226, 225, 0.51) 99.98%) !important; 
+`;
+
 const Header = styled.header`
+    margin-top: 3rem;
     .logo {
         position: absolute;
         margin-top: 6rem;
@@ -112,6 +125,7 @@ const GreetingMessage = styled.h1`
 
 const InfoMessage = styled.h2`
     font-size: 1rem;
+    font-weight: lighter;
 `;
 
 const InputWrapper = styled.div`
@@ -119,7 +133,7 @@ const InputWrapper = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 18rem;
+    margin-top: 22rem;
     gap: 1rem;  
 `;
 
@@ -140,6 +154,8 @@ const Signup = styled.p`
 
     &:hover {
         color: #0000004D; 
+        text-decoration: underline;
+        text-underline-offset: 2px;
     }
 `;
 
@@ -153,6 +169,7 @@ const ButtonWrapper = styled.div`
 `;
 
 const LoginButton = styled(BoxType._10radiux_Box)`  
+    margin-top: 2rem;
     background-color: #FF4F4DCC;
     border: 1px solid #FF4F4DCC;
     font-size: 1rem;
@@ -163,28 +180,26 @@ const LoginButton = styled(BoxType._10radiux_Box)`
     justify-content: center;
     color: white;
     cursor: pointer;
+    &:hover {
+      background-color: ${(props) => props.hoverBackgroundColor || '#FF4F4D80'};
+    }
 `;
 
-const Container = styled.div`
+const KakaoButton = styled(BoxType._10radiux_Box)`  
+    margin-top: 1rem;
+    background-color: #F9E000;
+    border: 1px solid #F9E000;
+    font-size: 1rem;
+    width: 310px;
+    height: 3.5rem;
     display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    position: relative;
-    text-align: center;
-    background: linear-gradient(to bottom, #ffffff, #FDE2E180);
-    background-size: cover;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
     align-items: center;
-    border: 1px solid;
-    overflow-x: hidden;
+    justify-content: center;
+    color: #3B1C1C;
+    cursor: pointer;
 
-    @media (hover: hover) {
-        width: 390px;
-        margin: 0 auto;
-    }
-    &::-webkit-scrollbar {
-        display: none;
+    &:hover {
+      background-color: ${(props) => props.hoverBackgroundColor || '#F9E00080'};
     }
 `;
 
