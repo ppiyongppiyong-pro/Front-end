@@ -19,7 +19,7 @@ import { CallGPT } from "../components/Chat/gpt";
 
 const Chat = () => {
   const navigate = useNavigate();
-  const backBtn = () => navigate("/");
+  const backBtn = () => navigate("/MapPage");
 
   // 음성 인식
   const { transcript, listening, resetTranscript } = useSpeechRecognition();

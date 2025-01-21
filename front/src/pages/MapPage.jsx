@@ -31,7 +31,7 @@ function MapPage() {
                 // const token = localStorage.getItem("token");
                 const y=localStorage.getItem("lat");
                 const x=localStorage.getItem("lng");
-                const token = 'eyJ0eXBlIjoicmVmcmVzaCIsImFsZyI6IkhTMjU2In0.eyJzdWIiOiIxIiwicm9sZXMiOltdLCJpYXQiOjE3MzczNTI2MzQsImV4cCI6MTczNzk1NzQzNH0.GQEFNH8P1HPpGLN9WT-YZ0yBVmetVr8jvRg15wdptf8';
+                const token = localStorage.getItem("accessToken");
 
                 const response = await axios.get("http://52.79.245.244/api/v1/map/hospital", {
                     headers: {
@@ -170,7 +170,7 @@ function MapPage() {
 
     const goMy = () => navigate("/Mypage");
     const goManual = () => navigate("/Manual");
-    const goMap = () => navigate("/");
+    const goMap = () => navigate("/MapPage");
     const goChat = () => navigate("/Chat");
 
     // selectBox 생성

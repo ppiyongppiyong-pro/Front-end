@@ -18,8 +18,8 @@ function App() {
       <AnimatePresence>
         <Suspense fallback={<Loading />}>
           <Routes>
-            <Route path="/MapPage" element={<MapPage />} />
             <Route path="/" element={<Login />} />
+            <Route path="/MapPage" element={<MapPage />} />
             <Route path='/auth/kakao/callback' element={<Redirection />} />
             <Route path="/Chat" element={<Chat />} />
             <Route path="/Manual" element={<Manual />} />
