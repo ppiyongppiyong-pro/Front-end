@@ -32,8 +32,9 @@ export const CallGPT = async ({ prompt }) => {
             또한, 응급 상황에 관련된 답변만 줄 수 있습니다.
             응급상황 시스템 관련된 내용이 아니라면 답변하지 않습니다.
 
-            당신은 JSON 형식으로만 응답을 반환해야 합니다. 다른 텍스트나 형식은 포함하지 않습니다.
-            반환 형식:
+            당신은 무조건 JSON 형식으로만 응답을 반환해야 합니다. 다른 텍스트나 형식은 포함하지 않습니다.
+            응급상황 시스템 관련된 내용이 아니더라도 무조건 JSON 형태로 거부 문구를 넣어서 응답해야 합니다.
+            반드시 지켜야 하는 반환 형식:
             {
             "title": "[응답 제목]",
             "emergency_detail": "현재 긴급상황에 대처하는 방법을 단계별로 넘버링을 매겨 설명합니다."
@@ -63,31 +64,54 @@ export const CallGPT = async ({ prompt }) => {
             }),
         });
 
+        // 응답 객체로부터 'body'스트림을 꺼내고, Reader를 얻음
         const reader = response.body.getReader();
+
+        // 스트림으로 읽은 데이터를 텍스트로 변환하기 위해 decoder 생성
         const decoder = new TextDecoder("utf-8");
+
+        // gpt로부터 받은 최종 문자열을 누적할 변수임
         let fullContent = "";
 
+        // 스트림에서 데이터를 읽음
         while (true) {
+            // 스트림에서 일부 데이터(chunk)를 읽음
             const { done, value } = await reader.read();
+
+            //만약 끝났다면 더 이상 읽을 데이터가 없으므로 반복문을 빠져나감 
             if (done) break;
+
+            // 읽어들인 chunk를 utf-8 로 변환
             const chunk = decoder.decode(value, { stream: true });
 
             // 스트리밍 데이터가 JSON 형식이 아닐 경우 건너뜀
+            // 수신된 텍스트를 \n 기준으로 나눠, 빈 줄이 아닌 것만 추림
             const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+
             lines.forEach((line) => {
+                // 각 줄마다 data:... 로 시작하는 json 형태가 있는지 확인 
                 if (line.startsWith("data: ")) {
+
+                    // data 부분을 제거하고 남은 부분은 trim() [띄어쓰기]함 
                     const json = line.replace("data: ", "").trim();
+
+                    // 만약 done이 아니라면[정상 데이터라면] json parse 시도 
                     if (json !== "[DONE]") {
                         try {
+                            // 파싱을 시도해 parsed.choices[0].delta.content 형태로 gpt가 보낸 텍스트 꺼냄
                             const parsed = JSON.parse(json);
+                            // contens 부분을 "fullcontent"에 누적적
                             fullContent += parsed.choices[0]?.delta?.content || "";
                         } catch (error) {
+                            // 만약, 파싱에 실패한다면 파싱 에러를 콘솔에 출력 
                             console.error("JSON 파싱 에러: 잘못된 데이터가 수신되었습니다.", error);
                         }
                     }
                 }
             });
         }
+
+        console.log(">>>gpt.js 테스트 : ", fullContent);
 
         // 최종적으로 유효한 JSON 반환
         return JSON.parse(fullContent);

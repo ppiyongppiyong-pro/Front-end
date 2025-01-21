@@ -7,7 +7,6 @@ const Message = ({
   content,
   className,
   $role,
-  isInputting = false,
   isLoading = false,
   timestamp,
 }) => {
@@ -15,6 +14,11 @@ const Message = ({
   useEffect(() => {
     AOS.init({ duration: 1000 }); // 애니메이션 지속 시간 설정
   }, []);
+
+  console.log("----- 메시지 테스트 -----");
+  console.log("로딩 중인지 확인>>>> ", isLoading);
+  console.log("역할 확인>>>> ", $role);
+  console.log("------------------------");
 
   return (
     <MessageComponent className={className} $role={$role}>
@@ -25,11 +29,12 @@ const Message = ({
       <MessageContent
         data-aos={$role === "user" ? "" : "fade-right"}
       >
-        {isInputting || isLoading ? (
+        {isLoading ? (
           <span>...Loading</span>
         ) : (
           <span>
             {content
+              .replace(/\😊\s*/g, "😊\n")
               .replace(/\.\s*/g, ".\n")
               .replace(/\\n/g, "\n")
               .split("\n")
@@ -84,9 +89,9 @@ export const MessageProfileComponent = styled.div`
 const MessageContent = styled.div`
   border: 1px solid #FF4F4D;
   color: #FF4F4D;
-  border-radius: 20px;
+  border-radius: 15px;
   padding: 10px;
-  max-width: 60%;
+  max-width: 68%;
   word-wrap: break-word;
 `;
 

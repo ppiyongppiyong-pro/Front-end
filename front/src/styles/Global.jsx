@@ -14,7 +14,6 @@ export const Container = styled.div`
     min-height: 100vh;
     position: relative;
     text-align: center;
-    background: linear-gradient(179.98deg, #FFFFFF 20.02%, rgba(255, 243, 243, 0.671667) 73.6%, rgba(253, 226, 225, 0.51) 99.98%);
     background-size: cover;
     -ms-overflow-style: none;
     scrollbar-width: none;

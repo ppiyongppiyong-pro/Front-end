@@ -188,6 +188,7 @@ function MapPage() {
         {name: "비뇨기과"},
         {name: "정신건강의학과"},
         {name: "가정의학과"},
+        {name: "수의학과"},
     ];
 
     const categoryName = localStorage.getItem("categoryName") || "진료과 선택";
@@ -203,7 +204,7 @@ function MapPage() {
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <MapContainer>
+            <Container>
                 <BodyWrapper>
                     <Header>
                         <img className="logo" src={logo} alt="logo" />
@@ -313,15 +314,10 @@ function MapPage() {
                     <StyledIcon src={chat_icon} alt="chat_icon" style={{ marginLeft: "3.7rem" }} onClick={goChat} />
                     <StyledIcon src={my_icon} alt="my_icon" style={{ marginLeft: "8rem", marginTop: "-3.5rem" }} onClick={goMy} />
                 </Footer>
-            </MapContainer>
+            </Container>
         </motion.div>
     );
 };
-
-const MapContainer = styled(Container)`
-    background: white !important; 
-`;
-
 
 const Header = styled.header`
     .logo {

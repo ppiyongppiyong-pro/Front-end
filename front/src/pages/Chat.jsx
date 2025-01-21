@@ -1,60 +1,80 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import styled from "styled-components";
-import InputText from "../components/Chat/InputText";
-import Message from "../components/Chat/Message";
-import { Container, BodyWrapper, Body } from "../styles/Global";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import back from "../assets/chat/back.svg";
-import { RiSendPlaneFill } from "react-icons/ri";
-import { HiSpeakerWave } from "react-icons/hi2";
-import { HiSpeakerXMark } from "react-icons/hi2";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import { RiSendPlaneFill } from "react-icons/ri";
+import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 
-// AI 챗봇
+// 컴포넌트
+import InputText from "../components/Chat/InputText";
+import Message from "../components/Chat/Message";
+
+// 스타일
+import { Container, BodyWrapper, Body } from "../styles/Global";
+import back from "../assets/chat/back.svg";
+
+// 수정된 CallGPT
 import { CallGPT } from "../components/Chat/gpt";
 
 const Chat = () => {
   const navigate = useNavigate();
   const backBtn = () => navigate("/");
 
+  // 음성 인식
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
-
-  // 음성인식 토글 함수
   const toggleListening = useCallback(() => {
     if (listening) {
       SpeechRecognition.stopListening();
-      setInput(transcript); // 음성인식된 내용을 Input에 반영
+      setInput(transcript);
     } else {
-      resetTranscript(); // 이전 음성인식 데이터 초기화
+      resetTranscript();
       SpeechRecognition.startListening({ language: "ko-KR", continuous: true });
     }
   }, [listening, transcript, resetTranscript]);
 
-  const [input, setInput] = useState(""); // 입력된 텍스트 값
-  const [messages, setMessages] = useState([]); // 메시지 목록
-  const [isLoading, setLoading] = useState(false); // 로딩 상태
-  const [isInputting, setInputting] = useState(false); // 입력 중 상태
-  const messageEndRef = useRef(null); // 스크롤 조정
+  // 상태
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+  const [isInputting, setInputting] = useState(false);
 
-  // 메시지 스크롤 조정 함수
-  const scrollBottom = () => {
+  // 스크롤
+  const messageEndRef = useRef(null);
+  const scrollBottom = useCallback(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollBottom();
-  }, [messages]);
-
-  // 메시지 입력 처리
-  const handleInputChange = useCallback((value) => {
-    setInput(value);
-    setInputting(true); // 입력 중 상태 설정
-    setTimeout(() => setInputting(false), 500); // 일정 시간 후 입력 상태 해제
   }, []);
 
-  // 메시지 추가 및 전송 처리
-  const handleSendMessage = async () => {
+  // 스크롤 유지
+  useEffect(() => {
+    scrollBottom();
+  }, [messages, scrollBottom]);
+
+  // 초기 안내 메시지
+  const greetedRef = useRef(false);
+  useEffect(() => {
+    if (!greetedRef.current && messages.length === 0) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "안녕하세요, 응급 상황 대처 도우미 뿅뿅입니다😊 궁금한 점이 있다면 무엇이든 물어보세요!",
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+      greetedRef.current = true;
+    }
+  }, [messages]);
+
+  // 입력 처리
+  const handleInputChange = useCallback((value) => {
+    setInput(value);
+    setInputting(true);
+    setTimeout(() => setInputting(false), 500);
+  }, []);
+
+  // 전송
+  const handleSendMessage = useCallback(async () => {
     if (!input.trim()) {
       alert("메시지를 입력하세요!");
       return;
@@ -66,30 +86,38 @@ const Chat = () => {
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    // (A) 기존 messages 길이를 기록 → 새로 추가될 '로딩 메시지' 인덱스 계산
+    const prevLength = messages.length;
+    // 로딩 메시지는 prevLength + 1 인덱스가 될 예정
+
+    // 사용자 + 로딩 메시지를 한 번에 추가
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+      {
+        role: "assistant",
+        content: "",
+        isLoading: true,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      },
+    ]);
+
     setInput("");
+    setLoading(true);
     scrollBottom();
 
     try {
-      setLoading(true);
+      // GPT 호출
+      const response = await CallGPT({ prompt: userMessage.content });
 
-      // 로딩 중 메시지 추가
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          role: "assistant",
-          content: "",
-          isLoading: true, // 로딩 상태 표시
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ]);
+      // (B) 응답 오면, '로딩 메시지' 인덱스를 이용해 메시지 교체
+      // 사용자 메시지 1개 + 로딩 메시지 1개 → 새로 추가된 2개  
+      // 로딩 메시지 인덱스 = prevLength + 1
+      const loadingIndex = prevLength + 1;
 
-      const response = await CallGPT({ prompt: input.trim() });
-
-      // 로딩 메시지를 응답 메시지로 교체
-      setMessages((prevMessages) =>
-        prevMessages.map((msg, index) =>
-          index === prevMessages.length - 1
+      setMessages((prev) =>
+        prev.map((msg, idx) =>
+          idx === loadingIndex
             ? {
                 ...msg,
                 content: `[${response.title}]\n\n${response.emergency_detail}`,
@@ -100,18 +128,24 @@ const Chat = () => {
       );
     } catch (error) {
       console.error("AI 응답 에러:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          role: "assistant",
-          content: "죄송합니다. 응답을 가져오는 데 문제가 발생했습니다.",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ]);
+
+      // 에러 시 로딩 메시지 교체
+      const loadingIndex = messages.length + 1; // or prevLength + 1
+      setMessages((prev) =>
+        prev.map((msg, idx) =>
+          idx === loadingIndex
+            ? {
+                ...msg,
+                content: "죄송합니다. 응답을 가져오는 데 문제가 발생했습니다.",
+                isLoading: false,
+              }
+            : msg
+        )
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, [input, messages, scrollBottom]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -171,8 +205,11 @@ const Chat = () => {
       </Container>
     </motion.div>
   );
-}
+};
 
+export default Chat;
+
+// styled-components...
 const Header = styled.header`
   .back {
     position: absolute;
@@ -185,7 +222,7 @@ const Header = styled.header`
 const HomepageMessage = styled.div`
   margin: auto;
   padding: 0 1em;
-  height: 840px; /* 기본 높이 설정 */
+  height: 840px;
   margin-bottom: 20px;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -211,7 +248,6 @@ const MessageInput = styled.div`
   position: relative;
   margin: auto;
   max-width: 390px;
-  input:focus {outline: none;} 
 
   .speech {
     position: absolute;
@@ -224,31 +260,25 @@ const MessageInput = styled.div`
     border: none;
     border-radius: 15px;
     cursor: pointer;
-    justify-content: center;
-    align-items: center;
   }
 
-  input {
-    display: block;
-    max-width: 800px;
-    margin: auto;
+  input:focus {
+    outline: none;
   }
 
   .send {
     position: absolute;
     right: 11px;
     bottom: 9px;
-    width: 35px; 
+    width: 35px;
     height: 35px;
     background: #ff7775;
     border: none;
-    border-radius: 50%; 
+    border-radius: 50%;
     cursor: pointer;
-    display: flex; 
+    display: flex;
     justify-content: center;
     align-items: center;
     box-shadow: 0px 0px 5px 0px rgba(69,66,66,0.75);
   }
 `;
-
-export default Chat;

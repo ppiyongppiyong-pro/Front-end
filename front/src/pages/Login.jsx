@@ -36,7 +36,7 @@ function Login() {
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Container>
+            <LoginContainer>
                 <BodyWrapper>
                     <Header>
                         <img className="logo" src={logo} alt="logo" />
@@ -70,12 +70,16 @@ function Login() {
                         </KakaoButton>
                     </Body>
                 </BodyWrapper>
-            </Container>
+            </LoginContainer>
         </motion.div>
     );
 }
 
 export default Login;
+
+const LoginContainer = styled(Container)`
+    background: linear-gradient(179.98deg, #FFFFFF 20.02%, rgba(255, 243, 243, 0.671667) 73.6%, rgba(253, 226, 225, 0.51) 99.98%) !important; 
+`;
 
 const Header = styled.header`
   position: relative;
