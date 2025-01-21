@@ -175,8 +175,8 @@
 
 ## 🖍️ 스웨거
 
-### [📏스웨거 링크](http://52.79.245.244/swagger-ui/index.html)
-
+### [📏스웨거 링크 Spring](http://52.79.245.244/swagger-ui/index.html)
+### [📏스웨거 링크 AI](http://13.125.7.215:8000/api/ai/swagger)
 <br/>
 <br/>
 
