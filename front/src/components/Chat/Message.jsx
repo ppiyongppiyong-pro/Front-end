@@ -34,7 +34,7 @@ const Message = ({
         ) : (
           <span>
             {content
-              .replace(/\😊\s*/g, "😊\n")
+              .replace(/😊\s*/g, "😊\n")
               .replace(/\.\s*/g, ".\n")
               .replace(/\\n/g, "\n")
               .split("\n")
