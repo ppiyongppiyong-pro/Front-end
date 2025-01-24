@@ -14,7 +14,6 @@ function Signup() {
     const [signupData, setSignupData] = useState({
         email: '',
         password: '',
-        passwordCheck: '',
         username: '',
         phoneNumber: '',
         gender: 'male',
@@ -26,7 +25,6 @@ function Signup() {
     const [errors, setErrors] = useState({
         email: '',
         password: '',
-        passwordCheck: '',
         phoneNumber: '',
         parentPhoneNumber: '',
         residentNo: ''
@@ -52,12 +50,6 @@ function Signup() {
                 setErrors((prev) => ({
                     ...prev,
                     password: patterns.password.test(value) ? '' : '비밀번호는 8자 이상, 영문+숫자 조합이어야 합니다.',
-                }));
-                break;
-            case 'passwordCheck':
-                setErrors((prev) => ({
-                    ...prev,
-                    passwordCheck: value === signupData.password ? '' : '비밀번호가 일치하지 않습니다.',
                 }));
                 break;
             case 'phoneNumber':
@@ -92,19 +84,26 @@ function Signup() {
     };
 
     const handleSignup = async () => {
-        // 모든 필드 검증
-        Object.keys(signupData).forEach((key) => validateField(key, signupData[key]));
-
-        if (Object.values(errors).some((error) => error !== '')) {
+        const newErrors = {
+            email: patterns.email.test(signupData.email) ? '' : '유효한 이메일을 입력해주세요.',
+            password: patterns.password.test(signupData.password) ? '' : '비밀번호는 8자 이상, 영문+숫자 조합이어야 합니다.',
+            phoneNumber: patterns.phone.test(signupData.phoneNumber) ? '' : '010-0000-0000 형식으로 입력해주세요.',
+            parentPhoneNumber: patterns.phone.test(signupData.parentPhoneNumber) ? '' : '010-0000-0000 형식으로 입력해주세요.',
+            residentNo: patterns.residentNo.test(signupData.residentNo) ? '' : '000000-0000000 형식으로 입력해주세요.',
+        };
+    
+        setErrors(newErrors);
+    
+        if (Object.values(newErrors).some((error) => error !== '')) {
             alert('입력값을 확인해주세요.');
             return;
         }
-
+    
         try {
             const response = await axios.post('http://52.79.245.244/auth/signup', signupData, {
                 headers: { 'Content-Type': 'application/json' }
             });
-
+    
             console.log('회원가입 성공:', response.data);
             alert('회원가입이 완료되었습니다.');
             navigate('/');
@@ -113,7 +112,7 @@ function Signup() {
             alert('회원가입에 실패했습니다. 다시 시도해주세요.');
         }
     };
-
+    
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <SignUpContainer>
