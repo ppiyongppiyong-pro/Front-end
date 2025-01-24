@@ -79,44 +79,44 @@ const Chat = () => {
       alert("메시지를 입력하세요!");
       return;
     }
-
+  
     const userMessage = {
       role: "user",
       content: input.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-
-    // (A) 기존 messages 길이를 기록 → 새로 추가될 '로딩 메시지' 인덱스 계산
+  
     const prevLength = messages.length;
-    // 로딩 메시지는 prevLength + 1 인덱스가 될 예정
-
-    // 사용자 + 로딩 메시지를 한 번에 추가
-    setMessages((prev) => [
-      ...prev,
-      userMessage,
-      {
-        role: "assistant",
-        content: "",
-        isLoading: true,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      },
-    ]);
-
+    console.log("사용자 메시지 인덱스:", prevLength); // 사용자 메시지 인덱스 확인
+  
+    setMessages((prev) => {
+      const updatedMessages = [
+        ...prev,
+        userMessage,
+        {
+          role: "assistant",
+          content: "",
+          isLoading: true,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ];
+  
+      // 현재 메시지 배열을 출력
+      console.log("업데이트된 메시지 배열:", updatedMessages);
+      return updatedMessages;
+    });
+  
     setInput("");
     setLoading(true);
     scrollBottom();
-
+  
     try {
-      // GPT 호출
       const response = await CallGPT({ prompt: userMessage.content });
-
-      // (B) 응답 오면, '로딩 메시지' 인덱스를 이용해 메시지 교체
-      // 사용자 메시지 1개 + 로딩 메시지 1개 → 새로 추가된 2개  
-      // 로딩 메시지 인덱스 = prevLength + 1
       const loadingIndex = prevLength + 1;
-
-      setMessages((prev) =>
-        prev.map((msg, idx) =>
+      console.log("로딩 메시지 인덱스:", loadingIndex); // 로딩 메시지 인덱스 확인
+  
+      setMessages((prev) => {
+        const updatedMessages = prev.map((msg, idx) =>
           idx === loadingIndex
             ? {
                 ...msg,
@@ -124,15 +124,18 @@ const Chat = () => {
                 isLoading: false,
               }
             : msg
-        )
-      );
+        );
+  
+        // 현재 메시지 배열을 출력
+        console.log("GPT 응답 후 업데이트된 메시지 배열:", updatedMessages);
+        return updatedMessages;
+      });
     } catch (error) {
       console.error("AI 응답 에러:", error);
-
-      // 에러 시 로딩 메시지 교체
-      const loadingIndex = messages.length + 1; // or prevLength + 1
-      setMessages((prev) =>
-        prev.map((msg, idx) =>
+      const loadingIndex = prevLength + 1;
+  
+      setMessages((prev) => {
+        const updatedMessages = prev.map((msg, idx) =>
           idx === loadingIndex
             ? {
                 ...msg,
@@ -140,8 +143,12 @@ const Chat = () => {
                 isLoading: false,
               }
             : msg
-        )
-      );
+        );
+  
+        // 에러 발생 후 메시지 배열 출력
+        console.log("에러 발생 후 업데이트된 메시지 배열:", updatedMessages);
+        return updatedMessages;
+      });
     } finally {
       setLoading(false);
     }
@@ -209,7 +216,6 @@ const Chat = () => {
 
 export default Chat;
 
-// styled-components...
 const Header = styled.header`
   .back {
     position: absolute;

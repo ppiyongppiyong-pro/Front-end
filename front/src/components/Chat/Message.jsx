@@ -18,6 +18,7 @@ const Message = ({
   console.log("----- 메시지 테스트 -----");
   console.log("로딩 중인지 확인>>>> ", isLoading);
   console.log("역할 확인>>>> ", $role);
+  console.log("Message 컴포넌트 content:", content);
   console.log("------------------------");
 
   return (
@@ -31,20 +32,19 @@ const Message = ({
       >
         {isLoading ? (
           <span>...Loading</span>
+        ) : content ? (
+          content
+            // \\n을 \n으로 변환
+            .replace(/\\\\n/g, "\n")
+            .split("\n") // \n 기준으로 줄 나누기
+            .map((line, index) => (
+              <span key={index}>
+                {line}
+                <br />
+              </span>
+            ))
         ) : (
-          <span>
-            {content
-              .replace(/\😊\s*/g, "😊\n")
-              .replace(/\.\s*/g, ".\n")
-              .replace(/\\n/g, "\n")
-              .split("\n")
-              .map((line, index) => (
-                <span key={index}>
-                  {line}
-                  <br />
-                </span>
-              ))}
-          </span>
+          <span>응답이 없습니다.</span>
         )}
       </MessageContent>
     </MessageComponent>

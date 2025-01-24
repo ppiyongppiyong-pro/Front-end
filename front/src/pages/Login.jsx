@@ -105,7 +105,7 @@ const Header = styled.header`
     margin-top: 3rem;
     .logo {
         position: absolute;
-        margin-top: 6rem;
+        margin-top: 4rem;
         margin-left: -10.8rem;
         transform: scale(1.3);
         transform-origin: top left;
@@ -113,7 +113,7 @@ const Header = styled.header`
 `;
 
 const TextWrapper = styled.div`
-    margin-top: 10rem;
+    margin-top: 8rem;
     margin-left: 1rem;
     position: absolute;
     text-align: left;
@@ -133,7 +133,7 @@ const InputWrapper = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 22rem;
+    margin-top: 19rem;
     gap: 1rem;  
 `;
 
@@ -164,12 +164,10 @@ const ButtonWrapper = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 1rem;
     gap: 1rem;  
 `;
 
 const LoginButton = styled(BoxType._10radiux_Box)`  
-    margin-top: 2rem;
     background-color: #FF4F4DCC;
     border: 1px solid #FF4F4DCC;
     font-size: 1rem;
