@@ -122,16 +122,6 @@ function Manual() {
             </Content>
           </Body>
         </BodyWrapper>
-        <Footer>
-          <Base>
-            <img src={bar} width="100%" alt="footer_bar" />
-          </Base>
-          <StyledIcon src={map_icon} alt="map_icon" style={{ marginLeft: "-10rem" }} onClick={goMap} />
-          <StyledIcon src={manual_icon} alt="manual_icon" style={{ marginLeft: "-6rem" }} onClick={goManual} />
-          <StyledLogoIcon src={logo_icon} alt="logo_icon" />
-          <StyledIcon src={chat_icon} alt="chat_icon" style={{ marginLeft: "3.7rem" }} onClick={goChat} />
-          <StyledIcon src={my_icon} alt="my_icon" style={{ marginLeft: "8rem", marginTop: "-3.5rem" }} onClick={goMy} />
-        </Footer>
       </Container>
     </motion.div>
   );
@@ -183,30 +173,6 @@ const CardWrapper = styled.div`
   flex-direction: column;
   gap: 1rem;
   align-items: center;  
-`;
-
-const Footer = styled.div`
-  position: relative;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%
-  border: none;
-  margin: 0;
-`;
-
-const Base = styled.div``;
-
-const StyledLogoIcon = styled.img`
-  position: absolute;
-  width: 4rem;
-  margin-left: -1.9rem;
-  margin-top: -4.35rem;
-`;
-
-const StyledIcon = styled.img`
-  position: absolute;
-  margin-top: -3.7rem;
 `;
 
 export default Manual;
