@@ -28,14 +28,11 @@ function Mypage() {
     residentNo: ''
   });
 
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
       console.log('로그인이 필요합니다.');
-      setIsLoading(false);
-      navigate('/login');
+      navigate('/');
       return;
     }
   
@@ -51,38 +48,53 @@ function Mypage() {
     })
     .catch(error => {
       console.error('마이페이지 오류:', error);
-      setUserInfo({});  
-    })
-    .finally(() => setIsLoading(false));
+      setUserInfo({});
+    });
   }, [navigate]);
   
-
   const handleLogout = async () => {
     const accessToken = localStorage.getItem('accessToken');
+    const email = localStorage.getItem('email');
+    const password = localStorage.getItem('password');
 
     if (!accessToken) {
       console.error("로그인 상태가 아닙니다.");
-      navigate('/login');
+      navigate('/');
       return;
     }
 
     try {
-      await axios.post('http://52.79.245.244/api/v1/auth/logout', {}, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('email');
-
-      console.log('로그아웃 성공!');
-      navigate('/login');
+      const response = await axios.post(
+        'http://52.79.245.244/auth/logout', 
+        {
+          email: email,
+          password: password
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+  
+      if (response.data === "로그아웃 되었습니다.") {
+        // 로컬 스토리지에서 토큰 및 사용자 정보 삭제
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('email');
+        localStorage.removeItem('password');  
+  
+        console.log('로그아웃 성공!');
+        navigate('/');
+      } else {
+        console.error('로그아웃 실패: 서버에서 올바른 응답을 받지 못했습니다.');
+      }
     } catch (error) {
       console.error('로그아웃 실패:', error.response?.data || error.message);
+      alert('로그아웃을 실패했습니다. 다시 시도해주세요.');
     }
   };
-
-  if (isLoading) return <div>로딩 중...</div>;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -91,7 +103,7 @@ function Mypage() {
           <Header>
             <img className="logo" src={logo} alt="logo" />
             <AccountWrapper>
-              <UserName>{userInfo.username || '회원'}</UserName>
+              <UserName>{userInfo.username}</UserName>
               <LogoutButton onClick={handleLogout}>
                 <img className="logout" src={logout} alt="logout" />
               </LogoutButton>

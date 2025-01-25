@@ -17,6 +17,72 @@ import back from "../assets/chat/back.svg";
 // 수정된 CallGPT
 import { CallGPT } from "../components/Chat/gpt";
 
+// const dummyData = [
+//   {
+//     role: 'assistant',
+//     content: '안녕하세요, 응급 상황 대처 도우미 뿅뿅입니다😊 궁금한 점이 있다면 무엇이든 물어보세요!',
+//     timestamp: '오후 11:20',
+//     isLoading: false,
+//   },
+//   {
+//     role: 'user',
+//     content: '벌에 쏘였을 때 대처 방법을 알려줘',
+//     timestamp: '오후 11:21',
+//   },
+//   {
+//     role: 'assistant',
+//     content:
+//       '[벌에 쏘였을 때의 대처 방법]\n\n1. 먼저, 쏘인 부위에 벌의 침이 남아있다면, 카드나 대체 물질로 부드럽게 긁어내세요. 손톱으로 집어내면 독이 퍼질 수 있습니다.\n2. 쏘인 부위를 차갑게 하기 위해 얼음찜질을 하세요. 이는 통증과 부종을 완화합니다.\n3. 알레르기 반응이 나타난다면 즉시 119에 신고하세요.',
+//     timestamp: '오후 11:21',
+//     isLoading: false,
+//   },
+//   {
+//     role: 'user',
+//     content: '왼쪽 팔이 골절 되었을 때 대처법을 알려 줘',
+//     timestamp: '오후 11:22',
+//   },
+//   {
+//     role: 'assistant',
+//     content:
+//       '[왼쪽 팔 골절 시 대처법]\n\n1. 움직이지 않도록 팔을 고정하세요.\n2. 차가운 물질로 부종을 완화시키세요.\n3. 즉시 의료기관을 방문하세요.\n4. 팔에 마비, 변색이 나타나면 즉시 119를 호출하세요.',
+//     timestamp: '오후 11:22',
+//     isLoading: false,
+//   },
+//   {
+//     role: 'user',
+//     content: '오늘 저녁 메뉴 추천해 줘',
+//     timestamp: '오후 11:22',
+//   },
+//   {
+//     role: 'assistant',
+//     content:
+//       '[비응급 상황]\n\n죄송합니다. 제가 제공할 수 있는 정보는 응급 상황에 대한 조치 방법에 한정되어 있습니다. 메뉴 추천 등 일상적인 상담은 제공할 수 없습니다.',
+//     timestamp: '오후 11:22',
+//     isLoading: false,
+//   },
+//   {
+//     role: 'user',
+//     content: '오늘 저녁 메뉴 추천해 줘',
+//     timestamp: '오후 11:22',
+//   },
+//   {
+//     role: 'assistant',
+//     content:
+//       '[왼쪽 팔 골절 시 대처법]\n\n1. 움직이지 않도록 팔을 고정하세요.\n2. 차가운 물질로 부종을 완화시키세요.\n3. 즉시 의료기관을 방문하세요.\n4. 팔에 마비, 변색이 나타나면 즉시 119를 호출하세요.',
+//     timestamp: '오후 11:22',
+//     isLoading: false,
+//   },
+// ];
+
+// // 테스트를 위한 코드 예제
+// dummyData.forEach((message) => {
+//   console.log("더미 데이터 테스트용 >>>>>>>>>>>>>>>>>> ");
+//   console.log('Role:', message.role);
+//   console.log('Content:', message.content);
+//   console.log('Timestamp:', message.timestamp);
+//   console.log('----');
+// });
+
 const Chat = () => {
   const navigate = useNavigate();
   const backBtn = () => navigate("/MapPage");
@@ -35,6 +101,7 @@ const Chat = () => {
 
   // 상태
   const [input, setInput] = useState("");
+  // const [messages, setMessages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [isInputting, setInputting] = useState(false);

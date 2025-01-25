@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const ManualBoxWrapper = styled.div`
@@ -7,8 +8,9 @@ const ManualBoxWrapper = styled.div`
   background-color: #FF4F4D05; 
   border: 1px solid #FF4F4D; 
   border-radius: 10px;
-  width: ${(props) => props.width || '333px'};
-  height: ${(props) => props.height || '93px'};  
+  width: 337px;
+  height: 93px;  
+  cursor: pointer;  
 `;
 
 const ManualThumbnail = styled.img`
@@ -16,6 +18,7 @@ const ManualThumbnail = styled.img`
   height: 93px;
   border-radius: 10px;
   object-fit: cover; 
+  
 `;
 
 const ContentWrapper = styled.div`
@@ -31,7 +34,6 @@ const ManualTitle = styled.h3`
   color: #000000;
   font-weight: bold;
   margin: 0.5rem 0rem;
-  
 `;
 
 const ManualSummaries = styled.p`
@@ -40,9 +42,15 @@ const ManualSummaries = styled.p`
   margin: 0;
 `;
 
-const ManualBox = ({ thumbnail, title, summary }) => {
+const ManualBox = ({ thumbnail, title, summary, emergencyName }) => {
+  const navigate = useNavigate();  
+
+  const handleManualClick = () => {
+    navigate(`/manualdetail/${encodeURIComponent(emergencyName)}`);
+  };
+
   return (
-    <ManualBoxWrapper>
+    <ManualBoxWrapper onClick={handleManualClick}>
       <ManualThumbnail src={thumbnail} alt="manual-thumbnail" />
       <ContentWrapper>
         <ManualTitle>{title}</ManualTitle>
@@ -53,4 +61,3 @@ const ManualBox = ({ thumbnail, title, summary }) => {
 };
 
 export default ManualBox;
-

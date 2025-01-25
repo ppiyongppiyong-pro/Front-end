@@ -8,6 +8,7 @@ import axios from 'axios';
 const SearchBarContainer = styled(BoxType._4radiux_Box)`
   background-color: #FF4F4D1A;
   border: 1px solid #FF4F4D1A;
+  box-sizing: border-box;
 
   &:hover {
     background-color: #FF4F4D1A;
@@ -35,6 +36,7 @@ const IconWrapper = styled.div`
 function SearchBar({ width, height, onSearchResults }) {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);  // 음성 인식 상태 관리
 
   // 검색 API 호출 함수
   const fetchSearchResults = async () => {
@@ -46,14 +48,15 @@ function SearchBar({ width, height, onSearchResults }) {
     setLoading(true);
     const accessToken = localStorage.getItem('accessToken');
 
+    console.log('요청한 텍스트:', searchText);  // 검색 요청 텍스트 로그 출력
+
     try {
       const response = await axios.get(`http://52.79.245.244/api/v1/manual/search`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
         params: {
-          Emergencyname: searchText,
-          emergencyName: searchText,
+          keyword: searchText,  // 'keyword'로만 검색어 전송
         },
       });
 
@@ -70,7 +73,11 @@ function SearchBar({ width, height, onSearchResults }) {
   // 음성 인식 완료 시 호출
   const handleSpeechRecognized = (text) => {
     setSearchText(text);
-    fetchSearchResults();  // 음성 인식 후 자동 검색
+  };
+
+  // 음성 인식 시작 및 종료 시 상태 변경
+  const handleListeningStateChange = (listening) => {
+    setIsListening(listening); // 음성 인식 시작/종료 상태 변경
   };
 
   // Enter 키 눌렀을 때 검색 실행
@@ -88,7 +95,6 @@ function SearchBar({ width, height, onSearchResults }) {
       <InputField
         id="search"
         type="text"
-        placeholder="검색어 입력"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -96,7 +102,14 @@ function SearchBar({ width, height, onSearchResults }) {
         disabled={loading}
       />
       <IconWrapper height={height}>
-        <SpeechButton onRecognized={handleSpeechRecognized} width={15} height={15} />
+        <SpeechButton 
+          mode="stt" 
+          onRecognized={handleSpeechRecognized} 
+          width={15} 
+          height={15} 
+          onListeningChange={handleListeningStateChange} 
+          isListening={isListening}  
+        />
       </IconWrapper>
     </SearchBarContainer>
   );

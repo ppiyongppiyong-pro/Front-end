@@ -23,7 +23,7 @@ function App() {
             <Route path='/auth/kakao/callback' element={<Redirection />} />
             <Route path="/Chat" element={<Chat />} />
             <Route path="/Manual" element={<Manual />} />
-            <Route path="/ManualDetail" element={<ManualDetail />} />
+            <Route path="/manualdetail/:emergencyName" element={<ManualDetail />} />
             <Route path="/Mypage" element={<Mypage />} />
             <Route path="/Signup" element={<Signup />} />
           </Routes>

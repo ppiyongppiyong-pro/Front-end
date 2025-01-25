@@ -15,7 +15,7 @@ import ManualBox from '../components/Box/ManualBox';
 import axios from 'axios';
 
 function Manual() {
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState('all');
   const [manualContent, setManualContent] = useState([]);
   const navigate = useNavigate();
 
@@ -29,12 +29,23 @@ function Manual() {
   };
 
   const handleSearchResults = (data) => {
-    setManualContent([data]);  // 검색 결과를 상태에 저장
+    // 데이터를 추가하는 방식으로 상태를 업데이트
+    const normalizedData = normalizeManualContent(data);
+    setManualContent(normalizedData);  // 검색 결과를 상태에 저장
+  };
+
+  const normalizeManualContent = (data) => {
+    return data.map(item => ({
+      emergencyImage: item.emergencyImage, 
+      emergencyName: item.emergencyName,
+      summary: item.manualSummaries || item.emergencyResponseSummary,  // 공통된 변수명 사용
+    }));
   };
 
   const fetchManualData = useCallback(async () => {
     const accessToken = localStorage.getItem('accessToken');
     const categoryMapping = {
+      'all': '1. 기본',
       'general': '1. 기본',
       'situational': '2. 상황별',
       'medical': '3. 의학적',
@@ -43,13 +54,10 @@ function Manual() {
     
     const categoryValue = categoryMapping[activeTab];
 
-    const formattedCategory = `3. 의학적`;
-    const formattedCategory2 = categoryValue;  
-
     console.log("API 요청 시작");
     console.log(`요청 URL: http://52.79.245.244/api/v1/manual/getCategory`);
     console.log(`요청 헤더: Authorization: Bearer ${accessToken}`);
-    console.log(`요청 파라미터:`, { Category: formattedCategory, category: formattedCategory2 });
+    console.log(`요청 파라미터:`, { Category: categoryValue, category: categoryValue });
 
     try {
       const response = await axios.get(
@@ -59,8 +67,8 @@ function Manual() {
             Authorization: `Bearer ${accessToken}`,
           },
           params: {
-            Category: formattedCategory,
-            category: formattedCategory2
+            Category: categoryValue,
+            category: categoryValue
           },
           paramsSerializer: params => {
             return Object.keys(params)
@@ -70,7 +78,8 @@ function Manual() {
         }
       );
       console.log("API 응답 성공", response.data);
-      setManualContent(response.data);
+      const normalizedData = normalizeManualContent(response.data); // 응답 받은 데이터를 통합된 구조로 변환
+      setManualContent(normalizedData);  
     } catch (error) {
       console.error('API 요청 실패:', error.response?.data || error.message);
     } finally {
@@ -78,10 +87,9 @@ function Manual() {
     }
   }, [activeTab]);
 
-  
   useEffect(() => {
     fetchManualData();
-  }, [fetchManualData]); 
+  }, [fetchManualData]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -95,6 +103,7 @@ function Manual() {
               <SearchBar onSearchResults={handleSearchResults} />
             </SearchArea>
             <TabContainer>
+              <Tab $active={activeTab === 'all'} onClick={() => handleTabClick('all')}>전체</Tab>
               <Tab $active={activeTab === 'general'} onClick={() => handleTabClick('general')}>기본</Tab>
               <Tab $active={activeTab === 'situational'} onClick={() => handleTabClick('situational')}>상황별</Tab>
               <Tab $active={activeTab === 'medical'} onClick={() => handleTabClick('medical')}>의학적</Tab>
@@ -104,7 +113,7 @@ function Manual() {
               {manualContent.length > 0 ? (
                 <CardWrapper>
                   {manualContent.map((item, index) => (
-                    <ManualBox key={index} thumbnail={item.emergencyImage} title={item.emergencyName} summary={item.manualSummaries} />
+                    <ManualBox key={index} thumbnail={item.emergencyImage} title={item.emergencyName} summary={item.summary} emergencyName={item.emergencyName}/>
                   ))}
                 </CardWrapper>
               ) : (
@@ -113,16 +122,6 @@ function Manual() {
             </Content>
           </Body>
         </BodyWrapper>
-        <Footer>
-          <Base>
-            <img src={bar} width="100%" alt="footer_bar" />
-          </Base>
-          <StyledIcon src={map_icon} alt="map_icon" style={{ marginLeft: "-10rem" }} onClick={goMap} />
-          <StyledIcon src={manual_icon} alt="manual_icon" style={{ marginLeft: "-6rem" }} onClick={goManual} />
-          <StyledLogoIcon src={logo_icon} alt="logo_icon" />
-          <StyledIcon src={chat_icon} alt="chat_icon" style={{ marginLeft: "3.7rem" }} onClick={goChat} />
-          <StyledIcon src={my_icon} alt="my_icon" style={{ marginLeft: "8rem", marginTop: "-3.5rem" }} onClick={goMy} />
-        </Footer>
       </Container>
     </motion.div>
   );
@@ -143,26 +142,29 @@ const SearchArea = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 `;
 
 const TabContainer = styled.div`
   display: flex;
   border-bottom: 2px solid #FF4F4D;
   margin-bottom: 20px;
+  justify-content: space-between;
 `;
 
 const Tab = styled.div`
-  width: 100%;
   padding-top: 20px;
   padding-bottom: 10px;
   cursor: pointer;
   font-weight: ${(props) => (props.$active ? 'bold' : 'normal')};
   color: ${(props) => (props.$active ? '#FF4F4D' : '#000000')};
   transition: all 0.3s;
+  text-align: center; 
+  flex-grow: 1; 
 `;
 
 const Content = styled.div`
-  margin-top: 20px;
+  margin: 20px 0px;
   font-size: 16px;
 `;
 
@@ -171,29 +173,6 @@ const CardWrapper = styled.div`
   flex-direction: column;
   gap: 1rem;
   align-items: center;  
-`;
-
-const Footer = styled.div`
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  border: none;
-  margin: 0;
-`;
-
-const Base = styled.div``;
-
-const StyledLogoIcon = styled.img`
-  position: absolute;
-  width: 4rem;
-  margin-left: -1.9rem;
-  margin-top: -4.35rem;
-`;
-
-const StyledIcon = styled.img`
-  position: absolute;
-  margin-top: -3.7rem;
 `;
 
 export default Manual;
