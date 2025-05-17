@@ -33,7 +33,7 @@ function MapPage() {
                 const x=localStorage.getItem("lng");
                 const token = localStorage.getItem("accessToken");
 
-                const response = await axios.get("http://52.79.245.244/api/v1/map/hospital", {
+                const response = await axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/hospitals/hospital`,  {
                     headers: {
                       Authorization: `Bearer ${token}`,
                     },
@@ -44,12 +44,13 @@ function MapPage() {
                     },
                   });
         
+                setDatas(response.data.hospitals || []);
                 console.log(y);
                 console.log(x);
                 console.log(categoryName);
                 console.log(response.data.hospitals);
-                setDatas(response.data.hospitals);
-                // console.log(token);
+                console.log("토큰"+token);
+                console.log("사용자이름"+localStorage.getItem("name"));
               } catch (error) {
                 if (error.response) {
                   // 서버가 응답한 상태 코드가 2xx 범위를 벗어난 경우
@@ -76,6 +77,9 @@ function MapPage() {
           
             fetchData();
           }, []);
+
+
+          
 
     const navigate = useNavigate();
     const [state, setState] = useState({
@@ -116,41 +120,52 @@ function MapPage() {
 
     // 현재 위치를 위도, 경도로 받아온 후, getAddress 함수를 호출하여 위도, 경도를 주소로 변환함
     useEffect(() => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-
-                    localStorage.setItem("lat", latitude);
-                    localStorage.setItem("lng", longitude);
-
-                    setState((prev) => ({
-                        ...prev,
-                        center: {
-                            lat: latitude,
-                            lng: longitude,
+        const checkKakao = setInterval(() => {
+            if (window.kakao && window.kakao.maps) {
+                clearInterval(checkKakao);
+    
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const { latitude, longitude } = position.coords;
+    
+                            localStorage.setItem("lat", latitude);
+                            localStorage.setItem("lng", longitude);
+    
+                            setState((prev) => ({
+                                ...prev,
+                                center: {
+                                    lat: latitude,
+                                    lng: longitude,
+                                },
+                                isLoading: false,
+                            }));
+    
+                            getAddress(latitude, longitude);
                         },
-                        isLoading: false,
-                    }));
-                    // 위도, 경도를 주소 변환하는 함수 호출
-                    getAddress(latitude, longitude); 
-                },
-                (err) => {
+                        (err) => {
+                            setState((prev) => ({
+                                ...prev,
+                                errMsg: err.message,
+                                isLoading: false,
+                            }));
+                        }
+                    );
+                } else {
                     setState((prev) => ({
                         ...prev,
-                        errMsg: err.message,
+                        errMsg: "현재 위치를 알 수 없어요..",
                         isLoading: false,
                     }));
                 }
-            );
-        } else {
-            setState((prev) => ({
-                ...prev,
-                errMsg: "현재 위치를 알 수 없어요..",
-                isLoading: false,
-            }));
-        }
+            } else {
+                console.log('카카오맵 스크립트가 아직 로드되지 않았어요. 계속 대기 중...');
+            }
+        }, 100); // 0.1초마다 카카오맵 로드 체크
+    
+        return () => clearInterval(checkKakao); // 컴포넌트 언마운트 시 interval 정리
     }, []);
+    
 
     // 모달 창 구현
     const [openModal, setOpenModal] = useState(null); // 모달에 표시할 병원의 인덱스를 저장

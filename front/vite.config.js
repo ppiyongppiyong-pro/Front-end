@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-// https://vite.dev/config/
+
+// vite 프록시 설정
 export default defineConfig({
   plugins: [react()],
-})
+});

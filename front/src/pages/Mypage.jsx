@@ -36,7 +36,7 @@ function Mypage() {
       return;
     }
   
-    axios.get('http://52.79.245.244/api/v1/mypage/getProfile', {
+    axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/mypage/getProfile`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
     .then(response => {
@@ -65,7 +65,7 @@ function Mypage() {
 
     try {
       const response = await axios.post(
-        'http://52.79.245.244/auth/logout', 
+        `${import.meta.env.VITE_APP_APP_URI}/api/auth/logout`, 
         {
           email: email,
           password: password

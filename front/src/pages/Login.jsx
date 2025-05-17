@@ -7,26 +7,18 @@ import Input from "../components/Input/Input";
 import logo from "../assets/logo.svg";
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { kakaoAuthUrl } from '../../config';
 
 function Login() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [kakaoCode, setKakaoCode] = useState(null);  
 
-  // 카카오 리디렉션 시 코드 추출 및 저장
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const code = params.get('code');
-
-    if (code) {
-      setKakaoCode(code);
-      console.log("카카오 인증 코드:", code);
-      handleKakaoLogin(code);
-    }
-  }, [location]);
+  // 카카오 로그인 요청
+  const kakaoSignup = () => {
+    window.location.href = kakaoAuthUrl;
+  };
 
   // 회원가입 페이지 이동
   const goToSignup = () => {
@@ -41,7 +33,7 @@ function Login() {
     }
 
     try {
-      const response = await axios.post('http://52.79.245.244/auth/signin', {
+      const response = await axios.post('/auth/signup', {
         email,
         password
       }, {
@@ -57,47 +49,6 @@ function Login() {
     } catch (error) {
       setErrorMessage('로그인 실패. 아이디 또는 비밀번호를 확인해주세요.');
       console.error('로그인 오류:', error);
-    }
-  };
-
-  // 카카오 로그인 요청
-  const kakaoSignup = async () => {
-    try {
-      const response = await axios.get('http://52.79.245.244/auth/kakao/page');
-      if (response.status === 200) {
-        window.location.href = response.data;
-      } else {
-      }
-    } catch (error) {
-    }
-  };
-
-  // 카카오 로그인 처리 함수
-  const handleKakaoLogin = async (code) => {
-    try {
-      const response = await axios.post(
-        `http://52.79.245.244/auth/kakao/callback?code=${code}`,
-        {},
-        {
-          headers: {
-            'accept': '*/*',
-          },
-        }
-      );
-
-      if (response.status === 200 && response.data.access) {
-        localStorage.setItem('accessToken', response.data.access);
-        localStorage.setItem('refreshToken', response.data.refresh);
-
-        console.log("카카오 로그인 성공!", response.data);
-        navigate('/MapPage');
-      } else {
-        console.error("카카오 로그인 실패");
-        setErrorMessage('카카오 로그인에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('카카오 로그인 오류:', error);
-      setErrorMessage('카카오 로그인 중 오류가 발생했습니다.');
     }
   };
 
@@ -250,3 +201,4 @@ const KakaoButton = styled(BoxType._10radiux_Box)`
 `;
 
 export default Login;
+
