@@ -100,7 +100,7 @@ function Signup() {
         }
     
         try {
-            const response = await axios.post('http://52.79.245.244/auth/signup', signupData, {
+            const response = await axios.post(`${import.meta.env.VITE_APP_APP_URI}/auth/signup`, signupData, {
                 headers: { 'Content-Type': 'application/json' }
             });
     

@@ -19,8 +19,8 @@ function App() {
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path='/auth/login/kakao' element={<Redirection />} />
             <Route path="/MapPage" element={<MapPage />} />
-            <Route path='/auth/kakao/callback' element={<Redirection />} />
             <Route path="/Chat" element={<Chat />} />
             <Route path="/Manual" element={<Manual />} />
             <Route path="/manualdetail/:emergencyName" element={<ManualDetail />} />

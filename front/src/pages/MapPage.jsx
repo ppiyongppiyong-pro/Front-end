@@ -25,57 +25,42 @@ function MapPage() {
         // get method
         const [datas, setDatas] = useState([]); 
         useEffect(() => {
-            const fetchData = async () => {
-              try {
-                // 로그인에서 저장된 토큰 가져오기
-                // const token = localStorage.getItem("token");
-                const y=localStorage.getItem("lat");
-                const x=localStorage.getItem("lng");
-                const token = localStorage.getItem("accessToken");
+        const fetchData = async () => {
+            const y = localStorage.getItem("lat");
+            const x = localStorage.getItem("lng");
+            const categoryName = localStorage.getItem("categoryName");
+            const token = localStorage.getItem("accessToken");
 
-                const response = await axios.get("http://52.79.245.244/api/v1/map/hospital", {
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                    },
-                    params: {
-                      x: x,
-                      y: y,
-                      categoryName: categoryName,
-                    },
-                  });
-        
-                console.log(y);
-                console.log(x);
-                console.log(categoryName);
-                console.log(response.data.hospitals);
-                setDatas(response.data.hospitals);
-                // console.log(token);
-              } catch (error) {
-                if (error.response) {
-                  // 서버가 응답한 상태 코드가 2xx 범위를 벗어난 경우
-                  console.error(
-                    "Server responded with a non-2xx status",
-                    error.response.status,
-                    error.response.data
-                  );
-                } else if (error.request) {
-                  // 요청은 보냈지만 응답을 받지 못한 경우
-                  console.error(
-                    "No response received from the server. Check your network connection.",
-                    error.request
-                  );
-                } else {
-                  // 요청을 보내기 전에 발생한 오류
-                  console.error("Error before sending the request", error.message);
-                }
-          
-                // 서버가 응답하지 않았거나 네트워크 오류 발생 시 추가 정보 출력
-                console.error("Full Error Object:", error);
-              }
-            };
-          
-            fetchData();
-          }, []);
+            console.log("y:", y);
+            console.log("x:", x);
+            console.log("categoryName:", categoryName);
+            console.log("accessToken:", token);  
+
+            if (!token) {
+            alert("로그인이 필요합니다. 다시 로그인해주세요.");
+            return;
+            }
+
+            try {
+            const response = await axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/hospitals/hospital`, {
+                headers: {
+                Authorization: `Bearer ${token}`, 
+                },
+                params: {
+                x,
+                y,
+                categoryName,
+                },
+            });
+
+            setDatas(response.data.hospitals || []);
+            } catch (error) {
+            console.error("API 요청 실패:", error.response?.data || error.message);
+            }
+        };
+
+        fetchData();
+        }, []);
 
     const navigate = useNavigate();
     const [state, setState] = useState({
@@ -116,41 +101,52 @@ function MapPage() {
 
     // 현재 위치를 위도, 경도로 받아온 후, getAddress 함수를 호출하여 위도, 경도를 주소로 변환함
     useEffect(() => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-
-                    localStorage.setItem("lat", latitude);
-                    localStorage.setItem("lng", longitude);
-
-                    setState((prev) => ({
-                        ...prev,
-                        center: {
-                            lat: latitude,
-                            lng: longitude,
+        const checkKakao = setInterval(() => {
+            if (window.kakao && window.kakao.maps) {
+                clearInterval(checkKakao);
+    
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const { latitude, longitude } = position.coords;
+    
+                            localStorage.setItem("lat", latitude);
+                            localStorage.setItem("lng", longitude);
+    
+                            setState((prev) => ({
+                                ...prev,
+                                center: {
+                                    lat: latitude,
+                                    lng: longitude,
+                                },
+                                isLoading: false,
+                            }));
+    
+                            getAddress(latitude, longitude);
                         },
-                        isLoading: false,
-                    }));
-                    // 위도, 경도를 주소 변환하는 함수 호출
-                    getAddress(latitude, longitude); 
-                },
-                (err) => {
+                        (err) => {
+                            setState((prev) => ({
+                                ...prev,
+                                errMsg: err.message,
+                                isLoading: false,
+                            }));
+                        }
+                    );
+                } else {
                     setState((prev) => ({
                         ...prev,
-                        errMsg: err.message,
+                        errMsg: "현재 위치를 알 수 없어요..",
                         isLoading: false,
                     }));
                 }
-            );
-        } else {
-            setState((prev) => ({
-                ...prev,
-                errMsg: "현재 위치를 알 수 없어요..",
-                isLoading: false,
-            }));
-        }
+            } else {
+                console.log('카카오맵 스크립트가 아직 로드되지 않았어요. 계속 대기 중...');
+            }
+        }, 100); // 0.1초마다 카카오맵 로드 체크
+    
+        return () => clearInterval(checkKakao); // 컴포넌트 언마운트 시 interval 정리
     }, []);
+    
 
     // 모달 창 구현
     const [openModal, setOpenModal] = useState(null); // 모달에 표시할 병원의 인덱스를 저장
@@ -267,12 +263,12 @@ function MapPage() {
 
                         <SelectBox>
                             <select className="department" onChange={handleSelect} value={selected}>
-                                <option value="진료과 선택">진료과 선택</option>
-                                {selectList.map((item) => (
-                                    <option value={item.name} key={item.name}>
-                                        {item.name}
-                                    </option>
-                                ))}
+                            <option value="진료과 선택">진료과 선택</option>
+                            {selectList.map((item) => (
+                                <option value={item.name} key={item.name}>
+                                {item.name}
+                                </option>
+                            ))}
                             </select>
                         </SelectBox>
 
