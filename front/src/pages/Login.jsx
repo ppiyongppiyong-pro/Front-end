@@ -33,7 +33,7 @@ function Login() {
     }
 
     try {
-      const response = await axios.post('/auth/signup', {
+      const response = await axios.post(`${import.meta.env.VITE_APP_APP_URI}/auth/login/form`, {
         email,
         password
       }, {
@@ -42,8 +42,8 @@ function Login() {
 
       localStorage.setItem('email', email);
       localStorage.setItem('password', password);
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('refreshToken', response.data.refresh);
+      localStorage.setItem("accessToken", response.data.data.accessToken);
+      // localStorage.setItem('refreshToken', response.data.refresh);
 
       navigate('/MapPage');
     } catch (error) {

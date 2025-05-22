@@ -25,61 +25,42 @@ function MapPage() {
         // get method
         const [datas, setDatas] = useState([]); 
         useEffect(() => {
-            const fetchData = async () => {
-              try {
-                // 로그인에서 저장된 토큰 가져오기
-                // const token = localStorage.getItem("token");
-                const y=localStorage.getItem("lat");
-                const x=localStorage.getItem("lng");
-                const token = localStorage.getItem("accessToken");
+        const fetchData = async () => {
+            const y = localStorage.getItem("lat");
+            const x = localStorage.getItem("lng");
+            const categoryName = localStorage.getItem("categoryName");
+            const token = localStorage.getItem("accessToken");
 
-                const response = await axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/hospitals/hospital`,  {
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                    },
-                    params: {
-                      x: x,
-                      y: y,
-                      categoryName: categoryName,
-                    },
-                  });
-        
-                setDatas(response.data.hospitals || []);
-                console.log(y);
-                console.log(x);
-                console.log(categoryName);
-                console.log(response.data.hospitals);
-                console.log("토큰"+token);
-                console.log("사용자이름"+localStorage.getItem("name"));
-              } catch (error) {
-                if (error.response) {
-                  // 서버가 응답한 상태 코드가 2xx 범위를 벗어난 경우
-                  console.error(
-                    "Server responded with a non-2xx status",
-                    error.response.status,
-                    error.response.data
-                  );
-                } else if (error.request) {
-                  // 요청은 보냈지만 응답을 받지 못한 경우
-                  console.error(
-                    "No response received from the server. Check your network connection.",
-                    error.request
-                  );
-                } else {
-                  // 요청을 보내기 전에 발생한 오류
-                  console.error("Error before sending the request", error.message);
-                }
-          
-                // 서버가 응답하지 않았거나 네트워크 오류 발생 시 추가 정보 출력
-                console.error("Full Error Object:", error);
-              }
-            };
-          
-            fetchData();
-          }, []);
+            console.log("y:", y);
+            console.log("x:", x);
+            console.log("categoryName:", categoryName);
+            console.log("accessToken:", token);  
 
+            if (!token) {
+            alert("로그인이 필요합니다. 다시 로그인해주세요.");
+            return;
+            }
 
-          
+            try {
+            const response = await axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/hospitals/hospital`, {
+                headers: {
+                Authorization: `Bearer ${token}`, 
+                },
+                params: {
+                x,
+                y,
+                categoryName,
+                },
+            });
+
+            setDatas(response.data.hospitals || []);
+            } catch (error) {
+            console.error("API 요청 실패:", error.response?.data || error.message);
+            }
+        };
+
+        fetchData();
+        }, []);
 
     const navigate = useNavigate();
     const [state, setState] = useState({
@@ -282,12 +263,12 @@ function MapPage() {
 
                         <SelectBox>
                             <select className="department" onChange={handleSelect} value={selected}>
-                                <option value="진료과 선택">진료과 선택</option>
-                                {selectList.map((item) => (
-                                    <option value={item.name} key={item.name}>
-                                        {item.name}
-                                    </option>
-                                ))}
+                            <option value="진료과 선택">진료과 선택</option>
+                            {selectList.map((item) => (
+                                <option value={item.name} key={item.name}>
+                                {item.name}
+                                </option>
+                            ))}
                             </select>
                         </SelectBox>
 
