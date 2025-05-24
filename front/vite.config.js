@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import svgr from 'vite-plugin-svgr'  
 
-
-// vite 프록시 설정
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), svgr()],       
 });
