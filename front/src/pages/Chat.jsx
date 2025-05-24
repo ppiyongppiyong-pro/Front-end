@@ -12,7 +12,8 @@ import Message from "../components/Chat/Message";
 
 // 스타일
 import { Container, BodyWrapper, Body } from "../styles/Global";
-import back from "../assets/chat/back.svg";
+import back from "../assets/chat/back.svg?react";
+
 
 // 수정된 CallGPT
 import { CallGPT } from "../components/Chat/gpt";
