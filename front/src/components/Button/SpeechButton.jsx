@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import { ReactComponent as SpeechIcon } from '../../assets/speech/speech_mark.svg?react';
+import SpeechIcon from '../../assets/speech/speech_mark.svg?react';
 
 const SpeechButton = ({ onRecognized, width = 24, height = 24, mode = "stt", textToSpeak }) => {
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
