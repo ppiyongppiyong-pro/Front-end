@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ReactComponent as EditIcon } from '../../assets/input/edit.svg'; 
+import EditIcon from '../../assets/input/edit.svg'; 
 import styled from 'styled-components';
 import { BoxType } from '../Box/BoxType'; 
 

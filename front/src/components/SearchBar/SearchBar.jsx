@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ReactComponent as MagnifyingGlassIcon } from '../../assets/search/magnifying_glass.svg';
+import MagnifyingGlassIcon from '../../assets/search/magnifying_glass.svg?react';
 import styled from 'styled-components';
 import { BoxType } from '../Box/BoxType.js';
 import SpeechButton from '../Button/SpeechButton';
