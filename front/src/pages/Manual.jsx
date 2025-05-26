@@ -61,7 +61,7 @@ function Manual() {
 
     try {
       const response = await axios.get(
-        `http://52.79.245.244/api/v1/manual/getCategory`, 
+        `https://52.79.245.244/api/v1/manual/getCategory`, 
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
