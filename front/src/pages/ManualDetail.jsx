@@ -30,7 +30,7 @@ function ManualDetail() {
 
       try {
         const response = await axios.get(
-          `https://52.79.245.244/api/v1/manual/explanation?EmergencyName=심장마비&emergencyName=${encodeURIComponent(emergencyName)}`,
+          `${import.meta.env.VITE_APP_APP_URI}/api/v1/manual/explanation?EmergencyName=심장마비&emergencyName=${encodeURIComponent(emergencyName)}`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
