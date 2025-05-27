@@ -31,10 +31,13 @@ function MapPage() {
             const categoryName = localStorage.getItem("categoryName");
             const token = localStorage.getItem("accessToken");
 
+            fetchData(); 
+
             console.log("y:", y);
             console.log("x:", x);
             console.log("categoryName:", categoryName);
             console.log("accessToken:", token);  
+            console.log(import.meta.env.VITE_APP_APP_URI)
 
             if (!token) {
             alert("로그인이 필요합니다. 다시 로그인해주세요.");
@@ -53,7 +56,7 @@ function MapPage() {
                 },
             });
 
-            setDatas(response.data.data.hospitals || []);
+            setDatas(response.data.hospitals || []);
             } catch (error) {
             console.error("API 요청 실패:", error.response?.data || error.message);
             }
