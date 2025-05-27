@@ -12,194 +12,311 @@ import chat_icon from "../assets/bottom_bar/chat.svg";
 import my_icon from "../assets/bottom_bar/my_icon.svg";
 import axios from 'axios';
 
+// 카카오 맵 구현 관련 import
 import markerImage from "../assets/map/marker.svg";
 import hospitalMarker from "../assets/map/hp_mark.svg";
 import { Map, MapMarker } from "react-kakao-maps-sdk";
 
+// 모달 관련 import
 import HospitalModal from "../components/Map/HospitalModal";
 
-const fetchData = async ({ x, y, categoryName, token, setDatas }) => {
-  if (!x || !y || !categoryName || !token) {
-    console.warn("요청 파라미터 누락:", { x, y, categoryName, token });
-    return;
-  }
-
-  try {
-    const response = await axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/hospitals/hospital`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: {
-        x,
-        y,
-        categoryName,
-      },
-    });
-    setDatas(response.data.hospitals || []);
-  } catch (error) {
-    console.error("API 요청 실패:", error.response?.data || error.message);
-  }
-};
-
 function MapPage() {
-  const [datas, setDatas] = useState([]);
-  const navigate = useNavigate();
-  const [state, setState] = useState({
-    center: { lat: 37.524877465547, lng: 127.10788678005 },
-    address: "",
-    errMsg: null,
-    isLoading: true,
-  });
 
-  const [showMarkerInfo, setShowMarkerInfo] = useState(false);
-  const toggleMarkerInfo = () => setShowMarkerInfo((prev) => !prev);
+        // get method
+        const [datas, setDatas] = useState([]); 
+        useEffect(() => {
+        const fetchData = async () => {
+            const y = localStorage.getItem("lat");
+            const x = localStorage.getItem("lng");
+            const categoryName = localStorage.getItem("categoryName");
+            const token = localStorage.getItem("accessToken");
 
-  const getAddress = (lat, lng) => {
-    const geocoder = new window.kakao.maps.services.Geocoder();
-    geocoder.coord2Address(lng, lat, (result, status) => {
-      if (status === window.kakao.maps.services.Status.OK) {
-        const addressName = result[0]?.road_address?.address_name || result[0]?.address?.address_name;
-        setState((prev) => ({ ...prev, address: addressName || "주소 정보를 가져올 수 없어요." }));
-      } else {
-        setState((prev) => ({ ...prev, address: "주소 정보를 가져올 수 없어요." }));
-      }
-    });
-  };
+            fetchData(); 
 
-  useEffect(() => {
-    const checkKakao = setInterval(() => {
-      if (window.kakao && window.kakao.maps) {
-        clearInterval(checkKakao);
+            console.log("y:", y);
+            console.log("x:", x);
+            console.log("categoryName:", categoryName);
+            console.log("accessToken:", token);  
+            console.log(import.meta.env.VITE_APP_APP_URI)
 
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const { latitude, longitude } = position.coords;
-              localStorage.setItem("lat", latitude);
-              localStorage.setItem("lng", longitude);
-              const token = localStorage.getItem("accessToken");
-              const categoryName = localStorage.getItem("categoryName") || "진료과 선택";
-              setState((prev) => ({ ...prev, center: { lat: latitude, lng: longitude }, isLoading: false }));
-              getAddress(latitude, longitude);
-              await fetchData({ x: longitude, y: latitude, categoryName, token, setDatas });
-            },
-            (err) => {
-              setState((prev) => ({ ...prev, errMsg: err.message, isLoading: false }));
+            if (!token) {
+            alert("로그인이 필요합니다. 다시 로그인해주세요.");
+            return;
             }
-          );
-        } else {
-          setState((prev) => ({ ...prev, errMsg: "현재 위치를 알 수 없어요..", isLoading: false }));
-        }
-      }
-    }, 100);
-    return () => clearInterval(checkKakao);
-  }, []);
 
-  const [openModal, setOpenModal] = useState(null);
-  const [selectedHospital, setSelectedHospital] = useState(null);
-  const toggleModal = (index) => {
-    setSelectedHospital(datas[index]);
-    setOpenModal(index);
-  };
-  const closeModal = () => {
-    setOpenModal(null);
-    setSelectedHospital(null);
-  };
+            try {
+            const response = await axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/hospitals/hospital`, {
+                headers: {
+                Authorization: `Bearer ${token}`, 
+                },
+                params: {
+                x,
+                y,
+                categoryName,
+                },
+            });
 
-  const goMy = () => navigate("/Mypage");
-  const goManual = () => navigate("/Manual");
-  const goMap = () => navigate("/MapPage");
-  const goChat = () => navigate("/Chat");
+            setDatas(response.data.hospitals || []);
+            } catch (error) {
+            console.error("API 요청 실패:", error.response?.data || error.message);
+            }
+        };
 
-  const selectList = [
-    { name: "내과" }, { name: "외과" }, { name: "정형외과" }, { name: "산부인과" },
-    { name: "피부과" }, { name: "이비인후과" }, { name: "치과" }, { name: "신경외과" },
-    { name: "소아과" }, { name: "안과" }, { name: "비뇨기과" }, { name: "정신건강의학과" },
-    { name: "가정의학과" }, { name: "수의학과" },
-  ];
+        fetchData();
+        }, []);
 
-  const categoryName = localStorage.getItem("categoryName") || "진료과 선택";
-  const [selected, setSelected] = useState(categoryName);
+    const navigate = useNavigate();
+    const [state, setState] = useState({
+        center: {
+            lat: 37.524877465547, 
+            lng: 127.10788678005,
+        },
+        address: "", 
+        errMsg: null,
+        isLoading: true,
+    });
 
-  const handleSelect = async (e) => {
-    const selectedValue = e.target.value;
-    setSelected(selectedValue);
-    localStorage.setItem("categoryName", selectedValue);
-    const lat = localStorage.getItem("lat");
-    const lng = localStorage.getItem("lng");
-    const token = localStorage.getItem("accessToken");
-    await fetchData({ x: lng, y: lat, categoryName: selectedValue, token, setDatas });
-  };
+    const [showMarkerInfo, setShowMarkerInfo] = useState(false); 
+        const toggleMarkerInfo = () => {
+        setShowMarkerInfo((prev) => !prev);  
+    };
 
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <Container>
-        <BodyWrapper>
-          <Header><img className="logo" src={logo} alt="logo" /></Header>
-          <Body>
-            <StyledMapContainer>
-              <Map center={state.center} style={{ width: '100%', height: '100%' }} level={3}>
-                {!state.isLoading && (
-                  <MapMarker
-                    position={state.center}
-                    image={{ src: markerImage, size: { width: 30, height: 30 }, options: { offset: { x: 20, y: 40 } } }}
-                    onClick={toggleMarkerInfo}
-                  >
-                    {showMarkerInfo && <div style={{ padding: "5px", color: "#000" }}>{state.errMsg || state.address}</div>}
-                  </MapMarker>
-                )}
-                {datas.map((hospital, index) => (
-                  <MapMarker
-                    key={index}
-                    position={{ lat: hospital.y, lng: hospital.x }}
-                    image={{ src: hospitalMarker, size: { width: 30, height: 30 }, options: { offset: { x: 15, y: 30 } } }}
-                    onClick={() => toggleModal(index)}
-                  >
-                    <div style={{ padding: "5px", color: "#000" }}>{hospital.placeName}</div>
-                  </MapMarker>
-                ))}
-              </Map>
-              {openModal !== null && selectedHospital && (
-                <HospitalModal isOpen={openModal !== null} hospital={selectedHospital} onClose={closeModal} />
-              )}
-            </StyledMapContainer>
+    // Geocoder를 통해 위도, 경도를 주소로 변경하기
+    const getAddress = (lat, lng) => {
+        const geocoder = new window.kakao.maps.services.Geocoder();
+    
+        geocoder.coord2Address(lng, lat, (result, status) => {
+            if (status === window.kakao.maps.services.Status.OK) {
+                const addressName = result[0]?.road_address?.address_name || result[0]?.address?.address_name;
+                setState((prev) => ({
+                    ...prev,
+                    address: addressName || "주소 정보를 가져올 수 없어요.",
+                }));
+            } else {
+                setState((prev) => ({
+                    ...prev,
+                    address: "주소 정보를 가져올 수 없어요.",
+                }));
+            }
+        });
+    };
+    
 
-            <SelectBox>
-              <select className="department" onChange={handleSelect} value={selected}>
-                <option value="진료과 선택">진료과 선택</option>
-                {selectList.map((item) => (
-                  <option value={item.name} key={item.name}>{item.name}</option>
-                ))}
-              </select>
-            </SelectBox>
+    // 현재 위치를 위도, 경도로 받아온 후, getAddress 함수를 호출하여 위도, 경도를 주소로 변환함
+    useEffect(() => {
+        const checkKakao = setInterval(() => {
+            if (window.kakao && window.kakao.maps) {
+                clearInterval(checkKakao);
+    
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const { latitude, longitude } = position.coords;
+    
+                            localStorage.setItem("lat", latitude);
+                            localStorage.setItem("lng", longitude);
+    
+                            setState((prev) => ({
+                                ...prev,
+                                center: {
+                                    lat: latitude,
+                                    lng: longitude,
+                                },
+                                isLoading: false,
+                            }));
+    
+                            getAddress(latitude, longitude);
+                        },
+                        (err) => {
+                            setState((prev) => ({
+                                ...prev,
+                                errMsg: err.message,
+                                isLoading: false,
+                            }));
+                        }
+                    );
+                } else {
+                    setState((prev) => ({
+                        ...prev,
+                        errMsg: "현재 위치를 알 수 없어요..",
+                        isLoading: false,
+                    }));
+                }
+            } else {
+                console.log('카카오맵 스크립트가 아직 로드되지 않았어요. 계속 대기 중...');
+            }
+        }, 100); // 0.1초마다 카카오맵 로드 체크
+    
+        return () => clearInterval(checkKakao); // 컴포넌트 언마운트 시 interval 정리
+    }, []);
+    
 
-            <MyAddress>
-              <p className='title'>현위치</p>
-              <p className='content'>{state.address}</p>
-            </MyAddress>
+    // 모달 창 구현
+    const [openModal, setOpenModal] = useState(null); // 모달에 표시할 병원의 인덱스를 저장
+    const [selectedHospital, setSelectedHospital] = useState(null); // 선택된 병원의 정보 저장
 
-            <HospitalBoxes>
-              {datas.map((hospital, index) => (
-                <HospitalBox key={index} onClick={() => toggleModal(index)}>
-                  <p className="hospital_name">{hospital.placeName}</p>
-                  <p className="hospital_address">{hospital.roadAddressName}</p>
-                </HospitalBox>
-              ))}
-            </HospitalBoxes>
-          </Body>
-        </BodyWrapper>
-        <Footer>
-          <Base><img src={bar} width="100%" alt="footer_bar" /></Base>
-          <StyledIcon src={map_icon} alt="map_icon" style={{ marginLeft: "-10rem" }} onClick={goMap} />
-          <StyledIcon src={manual_icon} alt="manual_icon" style={{ marginLeft: "-6rem" }} onClick={goManual} />
-          <StyledLogoIcon src={logo_icon} alt="logo_icon" />
-          <StyledIcon src={chat_icon} alt="chat_icon" style={{ marginLeft: "3.7rem" }} onClick={goChat} />
-          <StyledIcon src={my_icon} alt="my_icon" style={{ marginLeft: "8rem", marginTop: "-3.5rem" }} onClick={goMy} />
-        </Footer>
-      </Container>
-    </motion.div>
-  );
-}
+    // 마커 클릭 시 해당 병원의 정보와 모달 열기
+    const toggleModal = (index) => {
+        setSelectedHospital(datas[index]); // 클릭한 병원의 데이터를 저장
+        setOpenModal(index); // 모달 열기
+      };
+
+    // 모달 닫기
+    const closeModal = () => {
+        setOpenModal(null);
+        setSelectedHospital(null); // 모달 닫을 때 정보 초기화
+    };
+
+    const goMy = () => navigate("/Mypage");
+    const goManual = () => navigate("/Manual");
+    const goMap = () => navigate("/MapPage");
+    const goChat = () => navigate("/Chat");
+
+    // selectBox 생성
+    const selectList = [
+        {name: "내과"},
+        {name: "외과"},
+        {name: "정형외과"},
+        {name: "산부인과"},
+        {name: "피부과"},
+        {name: "이비인후과"},
+        {name: "치과"},
+        {name: "신경외과"},
+        {name: "소아과"},
+        {name: "안과"},
+        {name: "비뇨기과"},
+        {name: "정신건강의학과"},
+        {name: "가정의학과"},
+        {name: "수의학과"},
+    ];
+
+    const categoryName = localStorage.getItem("categoryName") || "진료과 선택";
+
+    const [selected, setSelected] = useState(categoryName);
+
+    const handleSelect = (e) => {
+        const selectedValue = e.target.value;
+        setSelected(selectedValue);
+        localStorage.setItem("categoryName", selectedValue);
+        window.location.reload();
+      };
+
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <Container>
+                <BodyWrapper>
+                    <Header>
+                        <img className="logo" src={logo} alt="logo" />
+                    </Header>
+                    <Body>
+                        <StyledMapContainer>
+                            <Map
+                                center={state.center}
+                                style={{ width: '100%', height: '100%' }}
+                                level={3}
+                            >
+                                {/* 현재 위치 마커 */}
+                                {!state.isLoading && (
+                                    <MapMarker
+                                        position={state.center}
+                                        image={{
+                                            src: markerImage, 
+                                            size: { width: 30, height: 30 },
+                                            options: { offset: { x: 20, y: 40 } },
+                                        }}
+                                        onClick={toggleMarkerInfo}  
+                                    >
+                                        {showMarkerInfo && (
+                                            <div style={{ padding: "5px", color: "#000", whiteSpace: "nowrap", textAlign: "left"  }}>
+                                                {state.errMsg || state.address}
+                                            </div>
+                                        )}
+                                    </MapMarker>
+                                )}
+
+                                {/* 병원 위치 마커 */}
+                                {datas.map((hospital, index) => (
+                                    <MapMarker
+                                        key={index}
+                                        position={{ lat: hospital.y, lng: hospital.x }}
+                                        image={{
+                                            src: hospitalMarker,
+                                            size: { width: 30, height: 30 },
+                                            options: { offset: { x: 15, y: 30 } },
+                                        }}
+                                        onClick={() => toggleModal(index)} // 마커 클릭 시 모달 열기
+                                    >
+                                        <div style={{ padding: "5px", color: "#000", whiteSpace: "nowrap", textAlign: "left" }}>
+                                            {hospital.placeName}
+                                        </div>
+                                    </MapMarker>
+                                ))}
+                            </Map>
+
+                            {openModal !== null && selectedHospital && (
+                                <HospitalModal 
+                                    isOpen={openModal !== null} 
+                                    hospital={selectedHospital} 
+                                    onClose={closeModal} 
+                                />
+                            )}
+
+                        </StyledMapContainer>
+
+
+                        <SelectBox>
+                            <select className="department" onChange={handleSelect} value={selected}>
+                            <option value="진료과 선택">진료과 선택</option>
+                            {selectList.map((item) => (
+                                <option value={item.name} key={item.name}>
+                                {item.name}
+                                </option>
+                            ))}
+                            </select>
+                        </SelectBox>
+
+                        {/* 본인의 현재 위치 박스 */}
+                        <MyAddress>
+                            <p className='title'>현위치</p>
+                            <p className='content'>{state.address}</p>
+                        </MyAddress>
+
+                        <HospitalBoxes>
+                        {datas.map((hospital, index) => (
+                            <HospitalBox
+                            key={index}
+                            onClick={() => toggleModal(index)} // 인덱스 전달
+                            style={{ cursor: "pointer" }}
+                            >
+                            <p className="hospital_name">{hospital.placeName}</p>
+                            <p className="hospital_address">{hospital.roadAddressName}</p>
+                            </HospitalBox>
+                        ))}
+                        </HospitalBoxes>
+
+                        {openModal !== null && selectedHospital && (
+                            <HospitalModal 
+                                isOpen={openModal !== null} 
+                                hospital={selectedHospital} 
+                                onClose={closeModal} 
+                            />
+                        )}
+                    </Body>
+                </BodyWrapper>
+                <Footer>
+                    <Base>
+                        <img src={bar} width="100%" alt="footer_bar" />
+                    </Base>
+                    <StyledIcon src={map_icon} alt="map_icon" style={{ marginLeft: "-10rem" }} onClick={goMap} />
+                    <StyledIcon src={manual_icon} alt="manual_icon" style={{ marginLeft: "-6rem" }} onClick={goManual} />
+                    <StyledLogoIcon src={logo_icon} alt="logo_icon" />
+                    <StyledIcon src={chat_icon} alt="chat_icon" style={{ marginLeft: "3.7rem" }} onClick={goChat} />
+                    <StyledIcon src={my_icon} alt="my_icon" style={{ marginLeft: "8rem", marginTop: "-3.5rem" }} onClick={goMy} />
+                </Footer>
+            </Container>
+        </motion.div>
+    );
+};
 
 const Header = styled.header`
     .logo {
