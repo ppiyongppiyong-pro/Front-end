@@ -26,12 +26,15 @@ function MapPage() {
         const [datas, setDatas] = useState([]); 
         useEffect(() => {
         const fetchData = async () => {
-            const y = localStorage.getItem("lat");
-            const x = localStorage.getItem("lng");
-            const categoryName = localStorage.getItem("categoryName");
-            const token = localStorage.getItem("accessToken");
+            const rawY = localStorage.getItem("lat");
+            const rawX = localStorage.getItem("lng");
+            const rawCategory = localStorage.getItem("categoryName");
 
-            fetchData(); 
+            const y = rawY ? parseFloat(rawY) : 37.5665;  
+            const x = rawX ? parseFloat(rawX) : 126.9780;
+            const categoryName = rawCategory || "진료과 선택";
+
+            const token = localStorage.getItem("accessToken");
 
             console.log("y:", y);
             console.log("x:", x);
