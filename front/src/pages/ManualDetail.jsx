@@ -5,24 +5,14 @@ import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { BoxType } from '../components/Box/BoxType.js';
 import SpeechButton from '../components/Button/SpeechButton';
-import logo_icon from "../assets/bottom_bar/logo_icon.svg";
-import manual_icon from "../assets/bottom_bar/manual_icon.svg";
-import map_icon from "../assets/bottom_bar/map_icon.svg";
-import chat_icon from "../assets/bottom_bar/chat.svg";
-import my_icon from "../assets/bottom_bar/my_icon.svg";
 import back from "../assets/back.svg";
-import bar from "../assets/bottom_bar/bar.svg";
 import axios from 'axios';
+import BottomNavigation from '../components/Navigation/BottomNavigation'; 
 
 function ManualDetail() {
   const [manualContent, setManualContent] = useState({ emergencyName: '', manualDetail: '' });
   const navigate = useNavigate();
   const { emergencyName } = useParams();
-
-  const goMy = () => navigate("/Mypage");
-  const goManual = () => navigate("/Manual");
-  const goMap = () => navigate("/MapPage");
-  const goChat = () => navigate("/Chat");
 
   useEffect(() => {
     const fetchManualData = async () => {
@@ -30,18 +20,18 @@ function ManualDetail() {
 
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_APP_APP_URI}/api/v1/manual/explanation?EmergencyName=심장마비&emergencyName=${encodeURIComponent(emergencyName)}`,
+          `${import.meta.env.VITE_APP_APP_URI}/api/v1/manuals/${encodeURIComponent(emergencyName)}?EmergencyName=심장마비`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
 
         setManualContent({
-          emergencyName: response.data.emergencyName,
-          manualDetail: response.data.manualDetail,
+          emergencyName: response.data.data.name,
+          manualDetail: response.data.data.detail,
         });
       } catch (error) {
-        console.error('API 요청 실패:', error);
+        console.error('API 요청 실패:', error.response?.data || error.message);
       }
     };
 
@@ -69,7 +59,7 @@ function ManualDetail() {
                 height={28} 
                 mode="tts" 
                 textToSpeak={manualContent.manualDetail} 
-               />
+              />
             </AccountWrapper>
           </Header>
           <Body>
@@ -77,23 +67,15 @@ function ManualDetail() {
               {manualContent.manualDetail}
             </InfoWrapper>
           </Body>
-          <Footer>
-            <Base>
-              <img src={bar} width="100%" alt="footer_bar" />
-            </Base>
-            <StyledIcon src={map_icon} alt="map_icon" style={{ marginLeft: "-10rem" }} onClick={goMap} />
-            <StyledIcon src={manual_icon} alt="manual_icon" style={{ marginLeft: "-6rem" }} onClick={goManual} />
-            <StyledLogoIcon src={logo_icon} alt="logo_icon" />
-            <StyledIcon src={chat_icon} alt="chat_icon" style={{ marginLeft: "3.7rem" }} onClick={goChat} />
-            <StyledIcon src={my_icon} alt="my_icon" style={{ marginLeft: "8rem", marginTop: "-3.5rem" }} onClick={goMy} />
-          </Footer>
         </BodyWrapper>
+
+        <BottomNavigation /> 
       </Container>
     </motion.div>
   );
 }
 
-// 스타일링
+// 스타일 정의
 const Header = styled.header`
   .back {
     position: absolute;
@@ -127,7 +109,7 @@ const InfoWrapper = styled(BoxType._10radiux_Box)`
   width: 333px; 
   height: auto;
   margin-top: 7rem;
-  margin-bottom: 6rem;
+  margin-bottom: 6rem;  
   font-size: 1rem;
   gap: 3rem;
   background-color: #FFFFFF;
@@ -143,28 +125,6 @@ const InfoWrapper = styled(BoxType._10radiux_Box)`
     background-color: #FFFFFF;
     border-color: #FF4F4D;
   }
-`;
-
-const Footer = styled.div`
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  border: none;
-  margin: 0;
-`;
-
-const Base = styled.div``;
-
-const StyledLogoIcon = styled.img`
-  position: absolute;
-  width: 4rem;
-  margin-left: -1.9rem;
-  margin-top: -4.35rem;
-`;
-
-const StyledIcon = styled.img`
-  position: absolute;
-  margin-top: -3.7rem;
 `;
 
 export default ManualDetail;
