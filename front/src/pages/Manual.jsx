@@ -4,82 +4,59 @@ import { Container, BodyWrapper, Body } from '../styles/Global';
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
-import bar from "../assets/bottom_bar/bar.svg";
-import logo_icon from "../assets/bottom_bar/logo_icon.svg";
-import manual_icon from "../assets/bottom_bar/manual_icon.svg";
-import map_icon from "../assets/bottom_bar/map_icon.svg";
-import chat_icon from "../assets/bottom_bar/chat.svg";
-import my_icon from "../assets/bottom_bar/my_icon.svg";
 import SearchBar from '../components/SearchBar/SearchBar';
 import ManualBox from '../components/Box/ManualBox';
 import axios from 'axios';
+import BottomNavigation from '../components/Navigation/BottomNavigation'; 
 
 function Manual() {
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('general'); 
   const [manualContent, setManualContent] = useState([]);
   const navigate = useNavigate();
-
-  const goMy = () => navigate("/Mypage");
-  const goManual = () => navigate("/Manual");
-  const goMap = () => navigate("/MapPage"); 
-  const goChat = () => navigate("/Chat");
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
 
   const handleSearchResults = (data) => {
-    // 데이터를 추가하는 방식으로 상태를 업데이트
     const normalizedData = normalizeManualContent(data);
-    setManualContent(normalizedData);  // 검색 결과를 상태에 저장
+    setManualContent(normalizedData);
   };
 
   const normalizeManualContent = (data) => {
     return data.map(item => ({
-      emergencyImage: item.emergencyImage, 
-      emergencyName: item.emergencyName,
-      summary: item.manualSummaries || item.emergencyResponseSummary,  // 공통된 변수명 사용
+      emergencyImage: item.imgurl || item.emergencyImage,
+      emergencyName: item.name || item.emergencyName,
+      summary: item.manualSummary || item.manualSummaries || item.emergencyResponseSummary,
     }));
   };
 
   const fetchManualData = useCallback(async () => {
     const accessToken = localStorage.getItem('accessToken');
     const categoryMapping = {
-      'all': '1. 기본',
-      'general': '1. 기본',
-      'situational': '2. 상황별',
-      'medical': '3. 의학적',
-      'traumatic': '5. 외상성'
+      'general': '기본',
+      'situational': '상황별',
+      'medical': '의학적',
+      'traumatic': '외상성'
     };
-    
-    const categoryValue = categoryMapping[activeTab];
 
-    console.log("API 요청 시작");
-    console.log(`요청 URL: http://52.79.245.244/api/v1/manual/getCategory`);
-    console.log(`요청 헤더: Authorization: Bearer ${accessToken}`);
-    console.log(`요청 파라미터:`, { Category: categoryValue, category: categoryValue });
+    const categoryValue = categoryMapping[activeTab];
 
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_APP_APP_URI}/api/v1/manual/getCategory`, 
+        `${import.meta.env.VITE_APP_APP_URI}/api/v1/manuals/category`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
           params: {
-            Category: categoryValue,
             category: categoryValue
-          },
-          paramsSerializer: params => {
-            return Object.keys(params)
-              .map(key => `${key}=${encodeURIComponent(params[key])}`)
-              .join('&');
           }
         }
       );
-      console.log("API 응답 성공", response.data);
-      const normalizedData = normalizeManualContent(response.data); // 응답 받은 데이터를 통합된 구조로 변환
-      setManualContent(normalizedData);  
+
+      const normalizedData = normalizeManualContent(response.data.data);
+      setManualContent(normalizedData);
     } catch (error) {
       console.error('API 요청 실패:', error.response?.data || error.message);
     } finally {
@@ -103,7 +80,6 @@ function Manual() {
               <SearchBar onSearchResults={handleSearchResults} />
             </SearchArea>
             <TabContainer>
-              <Tab $active={activeTab === 'all'} onClick={() => handleTabClick('all')}>전체</Tab>
               <Tab $active={activeTab === 'general'} onClick={() => handleTabClick('general')}>기본</Tab>
               <Tab $active={activeTab === 'situational'} onClick={() => handleTabClick('situational')}>상황별</Tab>
               <Tab $active={activeTab === 'medical'} onClick={() => handleTabClick('medical')}>의학적</Tab>
@@ -113,7 +89,13 @@ function Manual() {
               {manualContent.length > 0 ? (
                 <CardWrapper>
                   {manualContent.map((item, index) => (
-                    <ManualBox key={index} thumbnail={item.emergencyImage} title={item.emergencyName} summary={item.summary} emergencyName={item.emergencyName}/>
+                    <ManualBox
+                      key={index}
+                      thumbnail={item.emergencyImage}
+                      title={item.emergencyName}
+                      summary={item.summary}
+                      emergencyName={item.emergencyName}
+                    />
                   ))}
                 </CardWrapper>
               ) : (
@@ -122,19 +104,19 @@ function Manual() {
             </Content>
           </Body>
         </BodyWrapper>
+
+        <BottomNavigation /> 
       </Container>
     </motion.div>
   );
 }
 
-// 스타일링
 const Header = styled.header`
-  position: relative;
-  .logo {
-    position: absolute;
-    margin-top: 1.3rem;
-    margin-left: -10.8rem;
-  }
+    .logo {
+        position: absolute;
+        margin-top: 1.3rem;
+        margin-left: -10.8rem;
+    }
 `;
 
 const SearchArea = styled.div`
@@ -159,12 +141,12 @@ const Tab = styled.div`
   font-weight: ${(props) => (props.$active ? 'bold' : 'normal')};
   color: ${(props) => (props.$active ? '#FF4F4D' : '#000000')};
   transition: all 0.3s;
-  text-align: center; 
-  flex-grow: 1; 
+  text-align: center;
+  flex-grow: 1;
 `;
 
 const Content = styled.div`
-  margin: 20px 0px;
+  margin: 1rem 0rem 6rem 0rem; 
   font-size: 16px;
 `;
 
@@ -172,7 +154,7 @@ const CardWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  align-items: center;  
+  align-items: center;
 `;
 
 export default Manual;

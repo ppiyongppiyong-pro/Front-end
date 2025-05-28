@@ -4,16 +4,12 @@ import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import styled from "styled-components";
 import axios from 'axios';
+
 import logo from "../assets/logo.svg";
-import bar from "../assets/bottom_bar/bar.svg";
-import logo_icon from "../assets/bottom_bar/logo_icon.svg";
-import manual_icon from "../assets/bottom_bar/manual_icon.svg";
-import map_icon from "../assets/bottom_bar/map_icon.svg";
-import chat_icon from "../assets/bottom_bar/chat.svg";
-import my_icon from "../assets/bottom_bar/my_icon.svg";
 import logout from "../assets/logout/logout.svg";
 import { BoxType } from '../components/Box/BoxType';
-import InputBox from "../components/Input/InputBox";
+import EditableInputBox from "../components/Input/EditableInputBox";
+import BottomNavigation from '../components/Navigation/BottomNavigation'; 
 
 function Mypage() {
   const navigate = useNavigate();
@@ -25,7 +21,6 @@ function Mypage() {
     gender: '',
     parentPhoneNumber: '',
     address: '',
-    residentNo: ''
   });
 
   useEffect(() => {
@@ -35,41 +30,41 @@ function Mypage() {
       navigate('/');
       return;
     }
-  
-    axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/mypage/getProfile`, {
+
+    axios.get(`${import.meta.env.VITE_APP_APP_URI}/api/v1/members/profiles`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
     .then(response => {
-      if (response && response.data) {
-        setUserInfo(response.data);
-      } else {
-        console.error('서버에서 데이터를 정상적으로 불러오지 못했습니다.');
-      }
+      const data = response.data?.data || response.data;
+      setUserInfo({
+        email: data.email,
+        username: data.name,
+        phoneNumber: data.phoneNumber,
+        gender: data.gender,
+        parentPhoneNumber: data.parentPhoneNumber,
+        address: data.address,
+      });
     })
     .catch(error => {
       console.error('마이페이지 오류:', error);
       setUserInfo({});
     });
   }, [navigate]);
-  
+
   const handleLogout = async () => {
     const accessToken = localStorage.getItem('accessToken');
     const email = localStorage.getItem('email');
     const password = localStorage.getItem('password');
 
     if (!accessToken) {
-      console.error("로그인 상태가 아닙니다.");
       navigate('/');
       return;
     }
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_APP_APP_URI}/api/auth/logout`, 
-        {
-          email: email,
-          password: password
-        },
+        `${import.meta.env.VITE_APP_APP_URI}/auth/logout`, 
+        { email, password },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -77,22 +72,15 @@ function Mypage() {
           }
         }
       );
-  
-      if (response.data === "로그아웃 되었습니다.") {
-        // 로컬 스토리지에서 토큰 및 사용자 정보 삭제
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('email');
-        localStorage.removeItem('password');  
-  
-        console.log('로그아웃 성공!');
-        navigate('/');
+
+      if (response.status === 200) {
+        localStorage.clear();
+        navigate('/'); 
       } else {
-        console.error('로그아웃 실패: 서버에서 올바른 응답을 받지 못했습니다.');
+        alert('로그아웃 실패');
       }
     } catch (error) {
-      console.error('로그아웃 실패:', error.response?.data || error.message);
-      alert('로그아웃을 실패했습니다. 다시 시도해주세요.');
+      alert('로그아웃 실패');
     }
   };
 
@@ -111,33 +99,24 @@ function Mypage() {
           </Header>
           <Body>
             <InfoWrapper>
-              <InputBox id="email" width="310px" height="35px" label="아이디" value={userInfo.email} />
-              <InputBox id="phoneNumber" width="310px" height="35px" label="전화번호" value={userInfo.phoneNumber} />
-              <InputBox id="parentPhoneNumber" width="310px" height="35px" label="보호자 전화번호" value={userInfo.parentPhoneNumber} />
-              <InputBox id="address" width="310px" height="35px" label="주소" value={userInfo.address} />
-              <InputBox id="residentNo" width="310px" height="35px" label="주민등록번호" value={userInfo.residentNo} />
+              <EditableInputBox id="email" label="아이디" value={userInfo.email} canEdit={false} />
+              <EditableInputBox id="gender" label="성별" value={userInfo.gender} canEdit={false} />
+              <EditableInputBox id="username" label="이름" value={userInfo.username} patchKey="username" onValueChange={val => setUserInfo(prev => ({ ...prev, username: val }))} />
+              <EditableInputBox id="phoneNumber" label="전화번호" value={userInfo.phoneNumber} patchKey="phoneNumber" onValueChange={val => setUserInfo(prev => ({ ...prev, phoneNumber: val }))} />
+              <EditableInputBox id="parentPhoneNumber" label="보호자 전화번호" value={userInfo.parentPhoneNumber} patchKey="parentPhoneNumber" onValueChange={val => setUserInfo(prev => ({ ...prev, parentPhoneNumber: val }))} />
+              <EditableInputBox id="address" label="주소" value={userInfo.address} patchKey="address" onValueChange={val => setUserInfo(prev => ({ ...prev, address: val }))} />
             </InfoWrapper>
             <ButtonWrapper>
               <SignoutButton>회원탈퇴</SignoutButton>
             </ButtonWrapper>
           </Body>
         </BodyWrapper>
-        <Footer>
-          <Base>
-            <img src={bar} width="100%" alt="footer_bar" />
-          </Base>
-          <StyledIcon src={map_icon} alt="map_icon" style={{ marginLeft: "-10rem" }} onClick={() => navigate("/MapPage")} />
-          <StyledIcon src={manual_icon} alt="manual_icon" style={{ marginLeft: "-6rem" }} onClick={() => navigate("/Manual")} />
-          <StyledLogoIcon src={logo_icon} alt="logo_icon" />
-          <StyledIcon src={chat_icon} alt="chat_icon" style={{ marginLeft: "3.7rem" }} onClick={() => navigate("/Chat")} />
-          <StyledIcon src={my_icon} alt="my_icon" style={{ marginLeft: "8rem", marginTop: "-3.5rem" }} onClick={() => navigate("/Mypage")} />
-        </Footer>
+        <BottomNavigation /> 
       </Container>
     </motion.div>
   );
 }
 
-// 스타일 정리
 const LogoutButton = styled.button`
   background: none;
   border: none;
@@ -172,7 +151,7 @@ const InfoWrapper = styled.div`
   justify-content: center;
   align-items: center;
   padding-top: 7rem;
-  gap: 3rem;
+  gap: 0.5rem;
   width: 100%;
 `;
 
@@ -181,8 +160,8 @@ const ButtonWrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-top: 4rem;
-  gap: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 6rem;
 `;
 
 const SignoutButton = styled(BoxType._10radiux_Box)`
@@ -202,28 +181,6 @@ const SignoutButton = styled(BoxType._10radiux_Box)`
     border-color: #E60400;
     color: #ffffff;
   }
-`;
-
-const Footer = styled.div`
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  border: none;
-  margin: 0;
-`;
-
-const Base = styled.div``;
-
-const StyledLogoIcon = styled.img`
-  position: absolute;
-  width: 4rem;
-  margin-left: -1.9rem;
-  margin-top: -4.35rem;
-`;
-
-const StyledIcon = styled.img`
-  position: absolute;
-  margin-top: -3.7rem;
 `;
 
 export default Mypage;
