@@ -54,9 +54,9 @@ function MapPage() {
                 },
             });
 
-            setDatas(response.data.hospitals || []);
+            setDatas(response.data.data.hospitals || []);
             } catch (error) {
-            console.error("API 요청 실패:", error.response?.data || error.message);
+            console.error("API 요청 실패:", error.response?.data.data || error.message);
             }
         };
 
