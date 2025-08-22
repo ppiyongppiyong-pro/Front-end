@@ -55,9 +55,6 @@
 
 
 <h2>👩🏻‍💻 Frontend Developers </h2>
-
-
-| <img src="https://github.com/user-attachments/assets/c0401bdd-ba90-47f2-856e-43a6685d5e14" width="200"/> | <img src="https://github.com/user-attachments/assets/c0401bdd-ba90-47f2-856e-43a6685d5e14" width="200"/> |
 | :-----------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------: | 
 |                                           [채지연](https://github.com/Chaejy)                                            |                                          [김서진](https://github.com/seojin-kim12)                                           |                                                        
 |                                                   `Frontend`                                                   |                                                         `Frontend`                                                          |                                                    
